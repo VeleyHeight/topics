@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changeset/create_tables.sql
+#  - include:
+#      file: db/changelog/changeset/create-questions-table.sql
+#  - include:
+#      file: db/changelog/changeset/create-reactions-table.sql
