@@ -1,5 +1,5 @@
 --liquibase formatted sql
---changeset postgres:create-reactions-table
+--changeset postgres:003_create_reactions_table
 create table reactions(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY ,
     type VARCHAR(50),

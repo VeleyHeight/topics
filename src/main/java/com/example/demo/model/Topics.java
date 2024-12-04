@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 @Setter
 @Entity
 @Table
-public class topics {
+public class Topics {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -21,8 +21,8 @@ public class topics {
     @Column(columnDefinition = "VARCHAR(255)")
     private String description;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = true)
-    private topics parent_id;
+    @JoinColumn(name = "parent_id",nullable = true)
+    private Topics parent_id;
     @CreationTimestamp
     private Timestamp created_at;
     @UpdateTimestamp

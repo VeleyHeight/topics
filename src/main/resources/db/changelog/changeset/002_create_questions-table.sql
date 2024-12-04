@@ -1,5 +1,5 @@
 --liquibase formatted sql
---changeset postgres:create-questions-table
+--changeset postgres:002_create_questions_table
 
 CREATE TABLE questions (
                            id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

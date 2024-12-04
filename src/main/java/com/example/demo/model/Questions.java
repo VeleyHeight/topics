@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 @Setter
 @Getter
 @Table
-public class questions {
+public class Questions {
 
     @Id
     @GeneratedValue()
@@ -28,5 +28,5 @@ public class questions {
     private Timestamp updated_at;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
-    private topics topic_id;
+    private Topics topic_id;
 }

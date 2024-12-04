@@ -12,7 +12,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Table
-public class reactions {
+public class Reactions {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,5 +24,5 @@ public class reactions {
     private Timestamp created_at;
     @JoinColumn(nullable = true)
     @ManyToOne(fetch = FetchType.LAZY)
-    private questions questions_id;
+    private Questions questions_id;
 }
