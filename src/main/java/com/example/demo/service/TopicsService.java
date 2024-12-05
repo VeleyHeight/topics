@@ -1,12 +1,13 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Topics;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface TopicsService {
-    List<Topics> findAll();
+    Page<Topics> findAll(Pageable pageable);
+    Page<Topics> findAllByTitleContainingIgnoreCase(String title, Pageable pageable);
     Topics saveTopics(Topics topics);
-    void deleteTopics(Integer id);
+    String deleteTopics(Integer id);
     Topics updateTopics(Topics topics);
 }

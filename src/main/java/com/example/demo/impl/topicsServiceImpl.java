@@ -4,17 +4,22 @@ import com.example.demo.model.Topics;
 import com.example.demo.repository.TopicsRepository;
 import com.example.demo.service.TopicsService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class topicsServiceImpl implements TopicsService {
     TopicsRepository topicsRepository;
     @Override
-    public List<Topics> findAll() {
-        return topicsRepository.findAll();
+    public Page<Topics> findAll(Pageable pageable) {
+        return topicsRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<Topics> findAllByTitleContainingIgnoreCase(String title, Pageable pageable) {
+        return topicsRepository.findAllByTitleContainingIgnoreCase(title, pageable);
     }
 
     @Override
@@ -23,8 +28,9 @@ public class topicsServiceImpl implements TopicsService {
     }
 
     @Override
-    public void deleteTopics(Integer id) {
+    public String deleteTopics(Integer id) {
         topicsRepository.deleteById(id);
+        return "Topic deleted";
     }
 
     @Override
