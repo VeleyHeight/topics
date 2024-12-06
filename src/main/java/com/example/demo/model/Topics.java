@@ -20,7 +20,7 @@ public class Topics {
     private String title;
     @Column(columnDefinition = "VARCHAR(255)")
     private String description;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id",nullable = true)
     private Topics parent_id;
     @CreationTimestamp

@@ -23,12 +23,18 @@ public class reactionsServiceImpl implements ReactionsService {
     }
 
     @Override
-    public void deleteReactions(Integer id) {
+    public String deleteReactions(Integer id) {
         reactionsRepository.deleteById(id);
+        return "Reactions deleted";
     }
 
     @Override
     public Reactions updateReactions(Reactions reactions) {
         return reactionsRepository.save(reactions);
+    }
+
+    @Override
+    public Reactions findById(Integer id) {
+        return reactionsRepository.findById(id).orElse(null);
     }
 }

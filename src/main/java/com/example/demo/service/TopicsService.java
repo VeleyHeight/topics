@@ -10,4 +10,6 @@ public interface TopicsService {
     Topics saveTopics(Topics topics);
     String deleteTopics(Integer id);
     Topics updateTopics(Topics topics);
+    Topics findById(Integer id);
+    Topics findByIdExtended(Integer id);
 }

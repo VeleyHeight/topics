@@ -7,6 +7,7 @@ import java.util.List;
 public interface ReactionsService {
     List<Reactions> findAll();
     Reactions saveReactions(Reactions reactions);
-    void deleteReactions(Integer id);
+    String deleteReactions(Integer id);
     Reactions updateReactions(Reactions reactions);
+    Reactions findById(Integer id);
 }

@@ -35,7 +35,16 @@ public class topicsServiceImpl implements TopicsService {
 
     @Override
     public Topics updateTopics(Topics topics) {
-
         return topicsRepository.save(topics);
+    }
+
+    @Override
+    public Topics findById(Integer id) {
+        return topicsRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Topics findByIdExtended(Integer id) {
+        return null;
     }
 }
