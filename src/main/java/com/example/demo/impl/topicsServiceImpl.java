@@ -30,7 +30,7 @@ public class topicsServiceImpl implements TopicsService {
     @Override
     public String deleteTopics(Integer id) {
         topicsRepository.deleteById(id);
-        return "Topic deleted";
+        return "Topic deleted successfully";
     }
 
     @Override

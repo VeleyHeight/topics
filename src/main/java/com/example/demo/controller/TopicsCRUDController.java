@@ -21,28 +21,43 @@ import java.util.Map;
     @RequestMapping("/topics")
     public class TopicsCRUDController {
         private final TopicsService topicsService;
-        private final TopicsRepository topicsRepository;
-
         @GetMapping
         public ResponseEntity<Page<Topics>> getAllTopics(@RequestParam(required = false) String title,
                                          @RequestParam(defaultValue = "0") int page,
                                          @RequestParam(defaultValue = "10") int size) {
             if (title != null && !title.isEmpty()) {
-                return ResponseEntity.ok(topicsRepository.findAllByTitleContainingIgnoreCase(title, PageRequest.of(page, size)));
+                return ResponseEntity.ok(topicsService.findAllByTitleContainingIgnoreCase(title, PageRequest.of(page, size)));
             }
             return ResponseEntity.ok(topicsService.findAll(PageRequest.of(page, size)));
         }
         @GetMapping("/{id}")
         public ResponseEntity<Topics> getTopicsById(@PathVariable Integer id) {
-            return ResponseEntity.ok(topicsService.findById(id));
+            if (topicsService.findById(id) == null){
+                return ResponseEntity.notFound().build();
+            }
+            else {
+                return ResponseEntity.ok(topicsService.findById(id));
+            }
         }
         @PostMapping
         public ResponseEntity<Topics> createTopics(@RequestBody Topics topics) {
             return ResponseEntity.ok(topicsService.saveTopics(topics));
         }
         @PutMapping("/{id}")
-        public ResponseEntity<Topics> updateTopics(@RequestBody Topics topics) {
-            return ResponseEntity.ok(topicsService.updateTopics(topics));
+        public ResponseEntity<Topics> updateTopics(@PathVariable Integer id, @RequestBody Topics topics) {
+            Topics topicsFind = topicsService.findById(id);
+            if (topicsFind != null){
+                if (topics.getParent_id().toString().equals(topicsFind.getId().toString())){
+                    return ResponseEntity.badRequest().build();
+                }
+                topicsFind.setTitle(topics.getTitle());
+                topicsFind.setDescription(topics.getDescription());
+                topicsFind.setParent_id(topics.getParent_id());
+                return ResponseEntity.ok(topicsService.updateTopics(topics));
+            }
+            else{
+                return ResponseEntity.notFound().build();
+            }
         }
         @PatchMapping("/{id}")
         public ResponseEntity<Topics> patchTopics(@PathVariable Integer id, @RequestBody Map<String,Object> body) {

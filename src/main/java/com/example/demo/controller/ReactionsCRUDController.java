@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.Questions;
 import com.example.demo.model.Reactions;
 import com.example.demo.service.ReactionsService;
 import lombok.AllArgsConstructor;
@@ -11,9 +12,9 @@ import java.util.UUID;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("Reactions")
+@RequestMapping("/reactions")
 public class ReactionsCRUDController {
-    private ReactionsService reactionsService;
+    private final ReactionsService reactionsService;
     @PostMapping
     public ResponseEntity<Reactions> createReactions(@RequestBody Reactions reactions) {
         return ResponseEntity.ok(reactionsService.saveReactions(reactions));
@@ -36,6 +37,9 @@ public class ReactionsCRUDController {
                         break;
                     case "type":
                         reactions.setType((String)value);
+                        break;
+                    case "questions_id":
+                        reactions.setQuestions_id((Questions) value);
                         break;
                     default:
                         throw new IllegalArgumentException("Invalid key: " + key);

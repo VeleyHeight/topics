@@ -13,9 +13,8 @@ import java.sql.Timestamp;
 @Getter
 @Table
 public class Questions {
-
     @Id
-    @GeneratedValue()
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Column(columnDefinition = "TEXT")
     private String question;
@@ -26,7 +25,7 @@ public class Questions {
     private Timestamp created_at;
     @UpdateTimestamp
     private Timestamp updated_at;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "topic_id",nullable = false)
     private Topics topic_id;
 }
