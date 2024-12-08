@@ -1,5 +1,7 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.ExtendedDTO;
+import com.example.demo.dto.TopicsDTO;
 import com.example.demo.model.Topics;
 import com.example.demo.repository.TopicsRepository;
 import com.example.demo.service.TopicsService;
@@ -40,8 +42,13 @@ import java.util.Map;
             }
         }
         @PostMapping
-        public ResponseEntity<Topics> createTopics(@RequestBody Topics topics) {
-            return ResponseEntity.ok(topicsService.saveTopics(topics));
+        public ResponseEntity<Topics> createTopics(@RequestBody TopicsDTO topicsDTO) {
+            try {
+                return ResponseEntity.ok(topicsService.saveTopics(topicsDTO));
+            }
+            catch (Exception e){
+                return ResponseEntity.notFound().build();
+            }
         }
         @PutMapping("/{id}")
         public ResponseEntity<Topics> updateTopics(@PathVariable Integer id, @RequestBody Topics topics) {
@@ -69,22 +76,22 @@ import java.util.Map;
                 body.forEach((key, value) -> {
                     switch (key) {
                         case "title":
-                            topicsService.findById(id).setTitle((String) value);
+                            topics.setTitle((String) value);
                             break;
                         case "description":
-                            topicsService.findById(id).setDescription((String) value);
+                            topics.setDescription((String) value);
                             break;
                         case "parent_id":
-                            if (id.equals(topicsService.findById(id).getId())){
+                            if (id.equals(topics.getId())){
                                 throw new IllegalArgumentException("Recursion id: " + id);
                             }
-                            topicsService.findById(id).setParent_id(topics);
+                            topics.setParent_id((Topics) value);
                             break;
                         default:
                             throw new IllegalArgumentException("Invalid field: " + key);
                     }
                 });
-                return ResponseEntity.ok(topicsService.saveTopics(topics));
+                return ResponseEntity.ok(topicsService.updateTopics(topics));
             }
             catch (Exception e) {
                 return ResponseEntity.badRequest().build();
@@ -99,8 +106,8 @@ import java.util.Map;
                 return ResponseEntity.notFound().build();
             }
         }
-        //        @GetMapping("/full/{id}")
-//        public Topics getTopicsByIdExtended(@PathVariable Integer id) {
-//            return topicsService.findByIdExtended(id);
-//        }
+        @GetMapping("/extended/{id}")
+        public List<Object[]> getTopicsByIdExtended(@PathVariable Integer id) {
+            return topicsService.findByIdExtended(id);
+        }
     }
