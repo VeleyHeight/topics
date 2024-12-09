@@ -4,17 +4,15 @@ import com.example.demo.dto.ExtendedDTO;
 import com.example.demo.dto.TopicsDTO;
 import com.example.demo.model.Topics;
 import com.example.demo.repository.TopicsRepository;
+import com.example.demo.service.QuestionsService;
 import com.example.demo.service.TopicsService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +21,9 @@ import java.util.Map;
     @RequestMapping("/topics")
     public class TopicsCRUDController {
         private final TopicsService topicsService;
+        private final QuestionsService questionsService;
+        private final TopicsRepository topicsRepository;
+
         @GetMapping
         public ResponseEntity<Page<Topics>> getAllTopics(@RequestParam(required = false) String title,
                                          @RequestParam(defaultValue = "0") int page,
@@ -54,12 +55,12 @@ import java.util.Map;
         public ResponseEntity<Topics> updateTopics(@PathVariable Integer id, @RequestBody Topics topics) {
             Topics topicsFind = topicsService.findById(id);
             if (topicsFind != null){
-                if (topics.getParent_id().toString().equals(topicsFind.getId().toString())){
+                if (topics.getParentId().toString().equals(topicsFind.getId().toString())){
                     return ResponseEntity.badRequest().build();
                 }
                 topicsFind.setTitle(topics.getTitle());
                 topicsFind.setDescription(topics.getDescription());
-                topicsFind.setParent_id(topics.getParent_id());
+                topicsFind.setParentId(topics.getParentId());
                 return ResponseEntity.ok(topicsService.updateTopics(topics));
             }
             else{
@@ -85,7 +86,7 @@ import java.util.Map;
                             if (id.equals(topics.getId())){
                                 throw new IllegalArgumentException("Recursion id: " + id);
                             }
-                            topics.setParent_id((Topics) value);
+                            topics.setParentId((Topics) value);
                             break;
                         default:
                             throw new IllegalArgumentException("Invalid field: " + key);
@@ -107,7 +108,13 @@ import java.util.Map;
             }
         }
         @GetMapping("/extended/{id}")
-        public List<Object[]> getTopicsByIdExtended(@PathVariable Integer id) {
+        public List<ExtendedDTO> getTopicsByIdExtended(@PathVariable Integer id) {
+
             return topicsService.findByIdExtended(id);
+        }
+        @GetMapping("/extended/test/{id}")
+        public List<Topics> getTopicsByIdExtended1(@PathVariable Integer id) {
+
+            return topicsRepository.findByIdExtended(id);
         }
     }

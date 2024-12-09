@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.dto.ExtendedDTO;
 import com.example.demo.dto.TopicsDTO;
+import com.example.demo.model.Questions;
 import com.example.demo.model.Topics;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,5 +16,5 @@ public interface TopicsService {
     String deleteTopics(Integer id);
     Topics updateTopics(Topics topics);
     Topics findById(Integer id);
-    List<Object[]> findByIdExtended(Integer id);
+    List<ExtendedDTO> findByIdExtended(Integer id);
 }

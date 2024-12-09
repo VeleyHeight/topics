@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +22,8 @@ public class Reactions {
     private String type;
     @CreationTimestamp
     private Timestamp created_at;
-    @JoinColumn(nullable = true)
+    @JoinColumn(name = "questions_id",nullable = true)
     @ManyToOne(fetch = FetchType.EAGER)
-    private Questions questions_id;
+    @JsonBackReference
+    private Questions questionsId;
 }

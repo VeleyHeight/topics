@@ -15,5 +15,4 @@ public interface QuestionsService {
     String deleteQuestions(Integer id);
     Questions updateQuestions(Questions questions);
     Questions findById(Integer id);
-    Questions findByIdExtended(Integer id);
 }

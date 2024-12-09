@@ -11,7 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -33,12 +32,12 @@ public class questionsServiceImpl implements QuestionsService {
     @Override
     public Questions saveQuestions(QuestionsDTO questionsDTO) {
         Questions questions = new Questions();
-        Optional<Topics> optionalTopic = topicsRepository.findById(questionsDTO.getTopic_id());
+        Optional<Topics> optionalTopic = topicsRepository.findById(questionsDTO.getTopicId());
         if (optionalTopic.isPresent()){
             questions.setQuestion(questionsDTO.getQuestion());
             questions.set_popular(questionsDTO.is_popular());
             questions.setAnswer(questionsDTO.getAnswer());
-            questions.setTopic_id(optionalTopic.get());
+            questions.setTopicId(optionalTopic.get());
             return questionsRepository.save(questions);
         }
         else{
@@ -62,8 +61,4 @@ public class questionsServiceImpl implements QuestionsService {
         return questionsRepository.findById(id).orElse(null);
     }
 
-    @Override
-    public Questions findByIdExtended(Integer id) {
-        return null;
-    }
 }

@@ -2,11 +2,15 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Questions;
 import com.example.demo.model.Reactions;
+import com.example.demo.model.Topics;
 import com.example.demo.service.ReactionsService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -15,8 +19,13 @@ import java.util.UUID;
 @RequestMapping("/reactions")
 public class ReactionsCRUDController {
     private final ReactionsService reactionsService;
+    @GetMapping
+    public ResponseEntity<List<Reactions>> getAllTopics() {
+        return ResponseEntity.ok(reactionsService.findAll());
+    }
     @PostMapping
     public ResponseEntity<Reactions> createReactions(@RequestBody Reactions reactions) {
+        System.out.println(reactions.getUser_id());
         return ResponseEntity.ok(reactionsService.saveReactions(reactions));
     }
     @PutMapping("/{id}")
@@ -39,7 +48,7 @@ public class ReactionsCRUDController {
                         reactions.setType((String)value);
                         break;
                     case "questions_id":
-                        reactions.setQuestions_id((Questions) value);
+                        reactions.setQuestionsId((Questions) value);
                         break;
                     default:
                         throw new IllegalArgumentException("Invalid key: " + key);

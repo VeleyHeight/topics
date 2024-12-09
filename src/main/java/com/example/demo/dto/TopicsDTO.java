@@ -6,5 +6,5 @@ import lombok.Data;
 public class TopicsDTO {
     private String title;
     private String description;
-    private String parent_id;
+    private String parentId;
 }

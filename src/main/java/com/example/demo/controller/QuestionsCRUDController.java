@@ -70,8 +70,8 @@ public class QuestionsCRUDController {
                         case "answer":
                             questions.setAnswer((String) value);
                             break;
-                        case "topic_id":
-                            questions.setTopic_id((Topics) value);
+                        case "topicId":
+                            questions.setTopicId((Topics) value);
                             break;
                         case "is_popular":
                             questions.set_popular((boolean) value);
