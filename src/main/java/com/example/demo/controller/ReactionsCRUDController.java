@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.ReactionsDTO;
 import com.example.demo.model.Questions;
 import com.example.demo.model.Reactions;
 import com.example.demo.model.Topics;
@@ -24,9 +25,13 @@ public class ReactionsCRUDController {
         return ResponseEntity.ok(reactionsService.findAll());
     }
     @PostMapping
-    public ResponseEntity<Reactions> createReactions(@RequestBody Reactions reactions) {
-        System.out.println(reactions.getUser_id());
-        return ResponseEntity.ok(reactionsService.saveReactions(reactions));
+    public ResponseEntity<Reactions> createReactions(@RequestBody ReactionsDTO reactionsDTO) {
+        try {
+            return ResponseEntity.ok(reactionsService.saveReactions(reactionsDTO));
+        }
+        catch (Exception e){
+            return ResponseEntity.notFound().build();
+        }
     }
     @PutMapping("/{id}")
     public ResponseEntity<Reactions> updateReactions(@RequestBody Reactions reactions) {
@@ -54,7 +59,7 @@ public class ReactionsCRUDController {
                         throw new IllegalArgumentException("Invalid key: " + key);
                 }
             });
-            return ResponseEntity.ok(reactionsService.saveReactions(reactions));
+            return ResponseEntity.ok(reactionsService.updateReactions(reactions));
         }
         catch (Exception e) {
             return ResponseEntity.badRequest().build();

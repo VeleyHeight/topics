@@ -30,7 +30,7 @@ public class Topics {
     @JoinColumn(name = "parent_id",nullable = true)
     private Topics parentId ;
     @OneToMany(mappedBy = "topicId")
-    @JsonManagedReference
+    @JsonIgnore
     private List<Questions> questions;
     @CreationTimestamp
     private Timestamp created_at;

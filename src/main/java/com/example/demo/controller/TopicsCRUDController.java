@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.ExtendedDTO;
+import com.example.demo.dto.ExtendedTopicsDTO;
 import com.example.demo.dto.TopicsDTO;
 import com.example.demo.model.Topics;
 import com.example.demo.repository.TopicsRepository;
@@ -12,11 +12,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
-    @RestController
+@RestController
     @AllArgsConstructor
     @RequestMapping("/topics")
     public class TopicsCRUDController {
@@ -108,13 +106,13 @@ import java.util.Map;
             }
         }
         @GetMapping("/extended/{id}")
-        public List<ExtendedDTO> getTopicsByIdExtended(@PathVariable Integer id) {
+        public ExtendedTopicsDTO getTopicsByIdExtended(@PathVariable Integer id) {
 
             return topicsService.findByIdExtended(id);
         }
         @GetMapping("/extended/test/{id}")
-        public List<Topics> getTopicsByIdExtended1(@PathVariable Integer id) {
+        public ResponseEntity<ExtendedTopicsDTO> getTopicsByIdExtended1(@PathVariable Integer id) {
 
-            return topicsRepository.findByIdExtended(id);
+            return ResponseEntity.notFound().build();
         }
     }

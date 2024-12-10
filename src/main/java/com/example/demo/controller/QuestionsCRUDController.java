@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.ExtendedTopicsDTO;
 import com.example.demo.dto.QuestionsDTO;
 import com.example.demo.model.Questions;
 import com.example.demo.model.Topics;
@@ -94,5 +95,9 @@ public class QuestionsCRUDController {
         catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
+    }
+    @GetMapping("extended/{id}")
+    public ResponseEntity<ExtendedTopicsDTO> getQuestionsByIdExtended(@PathVariable Integer id){
+        return ResponseEntity.ok(questionsService.findByIdExtended(id));
     }
 }

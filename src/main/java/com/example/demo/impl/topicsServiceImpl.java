@@ -1,10 +1,13 @@
 package com.example.demo.impl;
 
-import com.example.demo.dto.ExtendedDTO;
+import com.example.demo.dto.ExtendedTopicsDTO;
+import com.example.demo.dto.ExtendedQuestions;
 import com.example.demo.dto.TopicsDTO;
 import com.example.demo.model.Questions;
+import com.example.demo.model.Reactions;
 import com.example.demo.model.Topics;
 import com.example.demo.repository.QuestionsRepository;
+import com.example.demo.repository.ReactionsRepository;
 import com.example.demo.repository.TopicsRepository;
 import com.example.demo.service.TopicsService;
 import lombok.AllArgsConstructor;
@@ -13,13 +16,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
 public class topicsServiceImpl implements TopicsService {
+    private final ReactionsRepository reactionsRepository;
     TopicsRepository topicsRepository;
     QuestionsRepository questionsRepository;
     @Override
@@ -39,7 +41,7 @@ public class topicsServiceImpl implements TopicsService {
         topics.setTitle(topicsDTO.getTitle());
         topics.setParentId(null);
         if (topicsDTO.getParentId() != null) {
-            Optional<Topics> topicsOptional = topicsRepository.findById(Integer.valueOf(topicsDTO.getParentId()));
+            Optional<Topics> topicsOptional = topicsRepository.findById(topicsDTO.getParentId());
             if (topicsOptional.isPresent()) {
                 topics.setParentId(topicsOptional.get());
             }
@@ -67,22 +69,28 @@ public class topicsServiceImpl implements TopicsService {
     }
 
     @Override
-    public List<ExtendedDTO> findByIdExtended(Integer id) {
+    public ExtendedTopicsDTO findByIdExtended(Integer id) {
         Optional<Topics> topics = topicsRepository.findById(id);
-        List<ExtendedDTO> extendedDTOList = new ArrayList<>();
+        ExtendedTopicsDTO extendedTopicsDTO = null;
         if (topics.isPresent()){
             List<Questions> questionsList = questionsRepository.findByTopicId(topics.get());
-            if (!topics.get().getQuestions().isEmpty()) {
-                for (int i = 0; i < topics.get().getQuestions().size(); i++) {
-                    ExtendedDTO extendedDTO = new ExtendedDTO(topics.get(), topics.get().getQuestions().get(i));
-                    extendedDTOList.add(extendedDTO);
+            if (!questionsList.isEmpty()){
+                List<ExtendedQuestions> extendedQuestionsList = new ArrayList<>();
+                List<Reactions> reactionsList;
+                for(Questions questions: questionsList){
+                    reactionsList = reactionsRepository.findAllByQuestionsId(questions);
+                    extendedQuestionsList.add(new ExtendedQuestions(questions.getId(),questions.getQuestion(),questions.getAnswer(),questions.is_popular(),reactionsList));
                 }
+                extendedTopicsDTO = new ExtendedTopicsDTO(topics.get(),extendedQuestionsList);
             }
-            else{
-                extendedDTOList.add(new ExtendedDTO(topics.get(), topics.get().getQuestions()));
+            else {
+                extendedTopicsDTO = new ExtendedTopicsDTO(topics.get());
             }
         }
-        return extendedDTOList;
+        else {
+            return null;
+        }
+        return extendedTopicsDTO;
     }
 
 }
