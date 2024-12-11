@@ -1,4 +1,4 @@
-package com.example.demo.dto;
+package com.example.demo.dto.extended;
 
 import com.example.demo.model.Topics;
 import lombok.Data;

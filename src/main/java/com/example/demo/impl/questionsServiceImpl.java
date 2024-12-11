@@ -1,7 +1,7 @@
 package com.example.demo.impl;
 
-import com.example.demo.dto.ExtendedQuestions;
-import com.example.demo.dto.ExtendedTopicsDTO;
+import com.example.demo.dto.extended.ExtendedQuestions;
+import com.example.demo.dto.extended.ExtendedTopicsDTO;
 import com.example.demo.dto.QuestionsDTO;
 import com.example.demo.model.Questions;
 import com.example.demo.model.Reactions;

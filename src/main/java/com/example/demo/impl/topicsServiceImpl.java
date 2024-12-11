@@ -1,8 +1,9 @@
 package com.example.demo.impl;
 
-import com.example.demo.dto.ExtendedTopicsDTO;
-import com.example.demo.dto.ExtendedQuestions;
-import com.example.demo.dto.TopicsDTO;
+import com.example.demo.dto.extended.ExtendedTopicsDTO;
+import com.example.demo.dto.extended.ExtendedQuestions;
+import com.example.demo.dto.topicsDTO.TopicsDTO;
+import com.example.demo.dto.topicsDTO.TopicsDTOValidation;
 import com.example.demo.model.Questions;
 import com.example.demo.model.Reactions;
 import com.example.demo.model.Topics;
@@ -35,19 +36,16 @@ public class topicsServiceImpl implements TopicsService {
     }
 
     @Override
-    public Topics saveTopics(TopicsDTO topicsDTO) {
+    public Topics saveTopics(TopicsDTOValidation topicsDTOValidation) {
         Topics topics = new Topics();
-        topics.setDescription(topicsDTO.getDescription());
-        topics.setTitle(topicsDTO.getTitle());
-        topics.setParentId(null);
-        if (topicsDTO.getParentId() != null) {
-            Optional<Topics> topicsOptional = topicsRepository.findById(topicsDTO.getParentId());
-            if (topicsOptional.isPresent()) {
-                topics.setParentId(topicsOptional.get());
-            }
-            else {
-                throw new EmptyResultDataAccessException(1);
-            }
+        topics.setDescription(topicsDTOValidation.getDescription());
+        topics.setTitle(topicsDTOValidation.getTitle());
+
+        if (topicsDTOValidation.getParentId() == null){
+            topics.setParentId(null);
+        }
+        else {
+           topics.setParentId(topicsRepository.findById(Integer.valueOf(topicsDTOValidation.getParentId())).get());
         }
         return topicsRepository.save(topics);
     }

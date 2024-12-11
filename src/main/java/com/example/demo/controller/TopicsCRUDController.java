@@ -1,17 +1,24 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.ExtendedTopicsDTO;
-import com.example.demo.dto.TopicsDTO;
+import com.example.demo.dto.extended.ExtendedTopicsDTO;
+import com.example.demo.dto.topicsDTO.TopicsDTO;
+import com.example.demo.dto.topicsDTO.TopicsDTOValidation;
 import com.example.demo.model.Topics;
 import com.example.demo.repository.TopicsRepository;
 import com.example.demo.service.QuestionsService;
 import com.example.demo.service.TopicsService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -41,13 +48,18 @@ import java.util.Map;
             }
         }
         @PostMapping
-        public ResponseEntity<Topics> createTopics(@RequestBody TopicsDTO topicsDTO) {
-            try {
-                return ResponseEntity.ok(topicsService.saveTopics(topicsDTO));
-            }
-            catch (Exception e){
-                return ResponseEntity.notFound().build();
-            }
+        public ResponseEntity<?> createTopics(@Valid @RequestBody TopicsDTOValidation topicsDTOValidation, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+                if (bindingResult.hasErrors()){
+                    Map<String, String> errors = new HashMap<>();
+                    bindingResult.getAllErrors().forEach((error)->{
+                        String field = error.getObjectName();
+                        String message = error.getDefaultMessage();
+                        errors.put(field,message);
+                    });
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+                }
+                return ResponseEntity.ok(topicsService.saveTopics(topicsDTOValidation));
+
         }
         @PutMapping("/{id}")
         public ResponseEntity<Topics> updateTopics(@PathVariable Integer id, @RequestBody Topics topics) {

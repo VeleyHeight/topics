@@ -1,8 +1,6 @@
-package com.example.demo.dto;
+package com.example.demo.dto.extended;
 
-import com.example.demo.model.Questions;
 import com.example.demo.model.Reactions;
-import jakarta.persistence.Column;
 import lombok.Data;
 
 import java.util.ArrayList;

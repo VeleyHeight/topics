@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.ExtendedTopicsDTO;
+import com.example.demo.dto.extended.ExtendedTopicsDTO;
 import com.example.demo.dto.QuestionsDTO;
 import com.example.demo.model.Questions;
 import org.springframework.data.domain.Page;
