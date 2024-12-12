@@ -51,9 +51,15 @@ public class topicsServiceImpl implements TopicsService {
     }
 
     @Override
-    public String deleteTopics(Integer id) {
-        topicsRepository.deleteById(id);
-        return "Topic deleted successfully";
+    public Topics deleteTopics(Integer id) {
+        if (!topicsRepository.existsById(id)){
+            return null;
+        }
+        else {
+            Topics topics = topicsRepository.findById(id).get();
+            topicsRepository.deleteById(id);
+            return topics;
+        }
     }
 
     @Override

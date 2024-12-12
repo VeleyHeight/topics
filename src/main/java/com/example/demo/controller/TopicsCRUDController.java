@@ -14,7 +14,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -26,8 +28,6 @@ import java.util.Map;
     @RequestMapping("/topics")
     public class TopicsCRUDController {
         private final TopicsService topicsService;
-        private final QuestionsService questionsService;
-        private final TopicsRepository topicsRepository;
 
         @GetMapping
         public ResponseEntity<Page<Topics>> getAllTopics(@RequestParam(required = false) String title,
@@ -48,34 +48,17 @@ import java.util.Map;
             }
         }
         @PostMapping
-        public ResponseEntity<?> createTopics(@Valid @RequestBody TopicsDTOValidation topicsDTOValidation, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
-                if (bindingResult.hasErrors()){
-                    Map<String, String> errors = new HashMap<>();
-                    bindingResult.getAllErrors().forEach((error)->{
-                        String field = error.getObjectName();
-                        String message = error.getDefaultMessage();
-                        errors.put(field,message);
-                    });
+        public ResponseEntity<?> createTopics(@Valid @RequestBody TopicsDTOValidation topicsDTOValidation) {
+                return ResponseEntity.status(HttpStatus.CREATED).body(topicsService.saveTopics(topicsDTOValidation));
+        }
+        @PutMapping("/{id}")
+        public ResponseEntity<?> updateTopics(@PathVariable Integer id,@Valid @RequestBody TopicsDTOValidation topicsDTOValidation) {
+                if (topicsDTOValidation.getParentId().equals(topicsService.findById(id).getId().toString())){
+                    Map<String,String> errors = new HashMap<>();
+                    errors.put("parentId", "The id of the topic cannot be equals parent id");
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
                 }
                 return ResponseEntity.ok(topicsService.saveTopics(topicsDTOValidation));
-
-        }
-        @PutMapping("/{id}")
-        public ResponseEntity<Topics> updateTopics(@PathVariable Integer id, @RequestBody Topics topics) {
-            Topics topicsFind = topicsService.findById(id);
-            if (topicsFind != null){
-                if (topics.getParentId().toString().equals(topicsFind.getId().toString())){
-                    return ResponseEntity.badRequest().build();
-                }
-                topicsFind.setTitle(topics.getTitle());
-                topicsFind.setDescription(topics.getDescription());
-                topicsFind.setParentId(topics.getParentId());
-                return ResponseEntity.ok(topicsService.updateTopics(topics));
-            }
-            else{
-                return ResponseEntity.notFound().build();
-            }
         }
         @PatchMapping("/{id}")
         public ResponseEntity<Topics> patchTopics(@PathVariable Integer id, @RequestBody Map<String,Object> body) {
@@ -109,22 +92,28 @@ import java.util.Map;
             }
         }
         @DeleteMapping("/{id}")
-        public ResponseEntity<String> deleteTopics(@PathVariable Topics id) {
-            try {
-                return ResponseEntity.ok(topicsService.deleteTopics(id.getId()));
-            }
-            catch (Exception e) {
+        public ResponseEntity<?> deleteTopics(@PathVariable Integer id) {
+            Topics topics = topicsService.deleteTopics(id);
+            if (topics == null) {
                 return ResponseEntity.notFound().build();
+            }
+            else {
+                return ResponseEntity.status(HttpStatus.OK).body(topics);
             }
         }
         @GetMapping("/extended/{id}")
         public ExtendedTopicsDTO getTopicsByIdExtended(@PathVariable Integer id) {
-
             return topicsService.findByIdExtended(id);
         }
-        @GetMapping("/extended/test/{id}")
-        public ResponseEntity<ExtendedTopicsDTO> getTopicsByIdExtended1(@PathVariable Integer id) {
-
-            return ResponseEntity.notFound().build();
+        @ResponseStatus(HttpStatus.BAD_REQUEST)
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+            Map<String, String> errors = new HashMap<>();
+            ex.getBindingResult().getAllErrors().forEach((error) -> {
+                String fieldName = ((FieldError) error).getField();
+                String errorMessage = error.getDefaultMessage();
+                errors.put(fieldName, errorMessage);
+            });
+            return errors;
         }
     }

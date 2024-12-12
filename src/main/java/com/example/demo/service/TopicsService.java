@@ -11,7 +11,7 @@ public interface TopicsService {
     Page<Topics> findAll(Pageable pageable);
     Page<Topics> findAllByTitleContainingIgnoreCase(String title, Pageable pageable);
     Topics saveTopics(TopicsDTOValidation topics);
-    String deleteTopics(Integer id);
+    Topics deleteTopics(Integer id);
     Topics updateTopics(Topics topics);
     Topics findById(Integer id);
     ExtendedTopicsDTO findByIdExtended(Integer id);
