@@ -4,6 +4,7 @@ import com.example.demo.dto.extended.ExtendedTopicsDTO;
 import com.example.demo.dto.extended.ExtendedQuestions;
 import com.example.demo.dto.topicsDTO.TopicsDTO;
 import com.example.demo.dto.topicsDTO.TopicsDTOValidation;
+import com.example.demo.dto.topicsDTO.UpdateTopicdDTOValidation;
 import com.example.demo.model.Questions;
 import com.example.demo.model.Reactions;
 import com.example.demo.model.Topics;
@@ -51,6 +52,21 @@ public class topicsServiceImpl implements TopicsService {
     }
 
     @Override
+    public Topics updateTopics(TopicsDTOValidation topicsDTOValidation, Integer id) {
+        Optional<Topics> topics = topicsRepository.findById(id);
+        topics.get().setParentId(topicsRepository.findById(Integer.parseInt(topicsDTOValidation.getParentId())).get());
+        topics.get().setDescription(topicsDTOValidation.getDescription());
+        topics.get().setTitle(topicsDTOValidation.getTitle());
+        return topicsRepository.save(topics.get());
+    }
+
+    @Override
+    public Topics patchTopics(UpdateTopicdDTOValidation topics, Integer id) {
+
+        return null;
+    }
+
+    @Override
     public Topics deleteTopics(Integer id) {
         if (!topicsRepository.existsById(id)){
             return null;
@@ -62,10 +78,6 @@ public class topicsServiceImpl implements TopicsService {
         }
     }
 
-    @Override
-    public Topics updateTopics(Topics topics) {
-        return topicsRepository.save(topics);
-    }
 
     @Override
     public Topics findById(Integer id) {

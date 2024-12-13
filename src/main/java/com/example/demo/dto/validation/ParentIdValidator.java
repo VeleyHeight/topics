@@ -4,14 +4,14 @@ import com.example.demo.repository.TopicsRepository;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @AllArgsConstructor
 @Component
 public class ParentIdValidator implements ConstraintValidator<ValidationTopicsDTO,String> {
-    private final TopicsRepository topicsRepository;
-
+    private TopicsRepository topicsRepository;
     @Override
     public boolean isValid(String string, ConstraintValidatorContext constraintValidatorContext) {
         if (string == null){
@@ -26,19 +26,3 @@ public class ParentIdValidator implements ConstraintValidator<ValidationTopicsDT
         }
     }
 }
-//    @Override
-//    public boolean isValid(String string, ConstraintValidatorContext constraintValidatorContext) {
-//        if (string == null){
-//            return true;
-//        }
-//        try{
-//            Integer id = Integer.parseInt(string);
-//            if(topicsRepository.existsById(id)){
-//                return !topicsRepository.findById(id).get().getParentId().getId().equals(id);
-//            }
-//            return false;
-//        }
-//        catch (Exception e){
-//            return false;
-//        }
-//    }
