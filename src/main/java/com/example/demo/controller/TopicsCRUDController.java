@@ -1,34 +1,26 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.extended.ExtendedTopicsDTO;
-import com.example.demo.dto.topicsDTO.TopicsDTO;
-import com.example.demo.dto.topicsDTO.TopicsDTOValidation;
+import com.example.demo.dto.TopicsDTO;
 import com.example.demo.model.Topics;
-import com.example.demo.repository.TopicsRepository;
-import com.example.demo.service.QuestionsService;
 import com.example.demo.service.TopicsService;
-import jakarta.validation.Valid;
+import jakarta.validation.*;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-@RestController
+    @RestController
     @AllArgsConstructor
     @RequestMapping("/topics")
     public class TopicsCRUDController {
         private final TopicsService topicsService;
-
+        Validator validator;
         @GetMapping
         public ResponseEntity<Page<Topics>> getAllTopics(@RequestParam(required = false) String title,
                                          @RequestParam(defaultValue = "0") int page,
@@ -39,71 +31,66 @@ import java.util.Map;
             return ResponseEntity.ok(topicsService.findAll(PageRequest.of(page, size)));
         }
         @GetMapping("/{id}")
-        public ResponseEntity<Topics> getTopicsById(@PathVariable Integer id) {
+        public ResponseEntity<?> getTopicsById(@PathVariable Integer id) {
             if (topicsService.findById(id) == null){
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id is not exist");
             }
             else {
                 return ResponseEntity.ok(topicsService.findById(id));
             }
         }
         @PostMapping
-        public ResponseEntity<?> createTopics(@Valid @RequestBody TopicsDTOValidation topicsDTOValidation) {
-                return ResponseEntity.status(HttpStatus.CREATED).body(topicsService.saveTopics(topicsDTOValidation));
+        public ResponseEntity<?> createTopics(@Valid @RequestBody TopicsDTO topicsDTO) {
+                return ResponseEntity.status(HttpStatus.CREATED).body(topicsService.saveTopics(topicsDTO));
         }
         @PutMapping("/{id}")
-        public ResponseEntity<?> updateTopics(@PathVariable Integer id,@Valid @RequestBody TopicsDTOValidation topicsDTOValidation) {
-                if (topicsDTOValidation.getParentId().equals(topicsService.findById(id).getId().toString())){
-                    Map<String,String> errors = new HashMap<>();
-                    errors.put("parentId", "The id of the topic cannot be equals parent id");
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
-                }
-                return ResponseEntity.ok(topicsService.saveTopics(topicsDTOValidation));
+        public ResponseEntity<?> updateTopics(@PathVariable Integer id,  @Valid @RequestBody TopicsDTO topicsDTO) {
+            if (topicsDTO.getParentId().equals(id)){
+                return ResponseEntity.badRequest().body("Parent id cannot be equals topic id");
+            }
+            if (topicsService.findById(id) == null){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id is not exist");
+            }
+                topicsDTO.setId(id);
+                return ResponseEntity.ok(topicsService.updateTopics(topicsDTO));
         }
         @PatchMapping("/{id}")
-        public ResponseEntity<Topics> patchTopics(@PathVariable Integer id, @RequestBody Map<String,Object> body) {
-            if (topicsService.findById(id) == null) {
-                return ResponseEntity.notFound().build();
+        public ResponseEntity<?> patchTopics(@PathVariable Integer id, @RequestBody HashMap<String,String> body) {
+                if (body.isEmpty()){
+                    return ResponseEntity.badRequest().build();
+                }
+            if (topicsService.findById(id) == null){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id is not exist");
             }
+            if (body.containsKey("parentId") && body.get("parentId").equals(id.toString())){
+                return ResponseEntity.badRequest().body("Parent id cannot be equals topic id");
+            }
+            Topics topics;
             try {
-                Topics topics = topicsService.findById(id);
-                body.forEach((key, value) -> {
-                    switch (key) {
-                        case "title":
-                            topics.setTitle((String) value);
-                            break;
-                        case "description":
-                            topics.setDescription((String) value);
-                            break;
-                        case "parent_id":
-                            if (id.equals(topics.getId())){
-                                throw new IllegalArgumentException("Recursion id: " + id);
-                            }
-                            topics.setParentId((Topics) value);
-                            break;
-                        default:
-                            throw new IllegalArgumentException("Invalid field: " + key);
-                    }
-                });
-                return ResponseEntity.ok(topicsService.updateTopics(topics));
+                topics = topicsService.patchTopics(body,id);
             }
-            catch (Exception e) {
-                return ResponseEntity.badRequest().build();
+            catch (Exception e ){
+                return ResponseEntity.badRequest().body(e.getMessage());
             }
+            return ResponseEntity.status(HttpStatus.OK).body(topics);
         }
         @DeleteMapping("/{id}")
         public ResponseEntity<?> deleteTopics(@PathVariable Integer id) {
-            Topics topics = topicsService.deleteTopics(id);
-            if (topics == null) {
-                return ResponseEntity.notFound().build();
+            if (topicsService.findById(id) == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id does not exist");
             }
             else {
-                return ResponseEntity.status(HttpStatus.OK).body(topics);
+                return ResponseEntity.status(HttpStatus.OK).body(topicsService.deleteTopics(id));
             }
         }
         @GetMapping("/extended/{id}")
-        public ExtendedTopicsDTO getTopicsByIdExtended(@PathVariable Integer id) {
-            return topicsService.findByIdExtended(id);
+        public ResponseEntity<?> getTopicsByIdExtended(@PathVariable Integer id) {
+            if (topicsService.findById(id) == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id does not exist");
+            }
+            else {
+                return ResponseEntity.ok(topicsService.findByIdExtended(id));
+            }
         }
         @ResponseStatus(HttpStatus.BAD_REQUEST)
         @ExceptionHandler(MethodArgumentNotValidException.class)

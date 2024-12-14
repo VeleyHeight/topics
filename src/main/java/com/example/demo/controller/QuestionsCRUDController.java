@@ -5,9 +5,11 @@ import com.example.demo.dto.QuestionsDTO;
 import com.example.demo.model.Questions;
 import com.example.demo.model.Topics;
 import com.example.demo.service.QuestionsService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,23 +32,19 @@ public class QuestionsCRUDController {
         }
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Questions> getById(@PathVariable Integer id){
+    public ResponseEntity<?> getQuestionsById(@PathVariable Integer id){
         if (questionsService.findById(id) == null){
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Question with this id is not exist");
         }
         else {
             return ResponseEntity.ok(questionsService.findById(id));
         }
     }
     @PostMapping
-    public ResponseEntity<Questions> createQuestions(@RequestBody QuestionsDTO questionsDTO){
-        try {
-            return ResponseEntity.ok(questionsService.saveQuestions(questionsDTO));
-        }
-        catch (Exception e){
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Questions> createQuestions(@Valid @RequestBody QuestionsDTO questionsDTO){
+        return ResponseEntity.status(HttpStatus.CREATED).body(questionsService.saveQuestions(questionsDTO));
     }
+    // С этого момента добавить оставшуюся валидацию
     @PutMapping("/{id}")
     public ResponseEntity<Questions> updateQuestions(@PathVariable Integer id, @RequestBody Questions questions){
         Questions questionsFind = questionsService.findById(id);

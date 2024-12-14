@@ -10,6 +10,7 @@ import com.example.demo.repository.QuestionsRepository;
 import com.example.demo.repository.ReactionsRepository;
 import com.example.demo.repository.TopicsRepository;
 import com.example.demo.service.QuestionsService;
+import jakarta.validation.Validator;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,7 @@ public class questionsServiceImpl implements QuestionsService {
     private QuestionsRepository questionsRepository;
     private TopicsRepository topicsRepository;
     private ReactionsRepository reactionsRepository;
+    private Validator validator;
 
     @Override
     public Page<Questions> findAll(Pageable pageable) {
@@ -40,24 +42,12 @@ public class questionsServiceImpl implements QuestionsService {
     public Questions saveQuestions(QuestionsDTO questionsDTO) {
         Questions questions = new Questions();
         Optional<Topics> optionalTopic = topicsRepository.findById(questionsDTO.getTopicId());
-        if (optionalTopic.isPresent()){
             questions.setQuestion(questionsDTO.getQuestion());
             questions.set_popular(questionsDTO.is_popular());
             questions.setAnswer(questionsDTO.getAnswer());
             questions.setTopicId(optionalTopic.get());
             return questionsRepository.save(questions);
-        }
-        else{
-            throw new IllegalArgumentException();
-        }
     }
-
-    @Override
-    public String deleteQuestions(Integer id) {
-        questionsRepository.deleteById(id);
-        return "Questions deleted successfully";
-    }
-
     @Override
     public Questions updateQuestions(Questions questions) {
         return questionsRepository.save(questions);
@@ -67,6 +57,14 @@ public class questionsServiceImpl implements QuestionsService {
     public Questions findById(Integer id) {
         return questionsRepository.findById(id).orElse(null);
     }
+
+    @Override
+    public String deleteQuestions(Integer id) {
+        questionsRepository.deleteById(id);
+        return "Questions deleted successfully";
+    }
+
+
 
     @Override
     public ExtendedTopicsDTO findByIdExtended(Integer id) {

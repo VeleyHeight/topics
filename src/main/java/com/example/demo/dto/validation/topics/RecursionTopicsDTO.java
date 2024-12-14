@@ -1,27 +1,22 @@
-package com.example.demo.dto.validation;
+package com.example.demo.dto.validation.topics;
 
-import com.example.demo.dto.topicsDTO.TopicsDTOValidation;
-import com.example.demo.repository.TopicsRepository;
+import com.example.demo.dto.TopicsDTO;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 
-@Component
-@AllArgsConstructor
-public class RecursionTopicsDTO implements ConstraintValidator<RecursionValidation, TopicsDTOValidation> {
+public class RecursionTopicsDTO implements ConstraintValidator<RecursionValidation, TopicsDTO> {
+
+
     @Override
-    public boolean isValid(TopicsDTOValidation topicsDTOValidation, ConstraintValidatorContext constraintValidatorContext) {
+    public boolean isValid(TopicsDTO topicsDTO, ConstraintValidatorContext constraintValidatorContext) {
 
-        if (topicsDTOValidation.getParentId() == null){
+        if (topicsDTO.getParentId() == null){
             return true;
         }
-        Integer id = topicsDTOValidation.getId();
+        Integer id = topicsDTO.getId();
         try {
-            Integer parentId = Integer.parseInt(topicsDTOValidation.getParentId());
+            Integer parentId = topicsDTO.getParentId();
             if (id != null && id.equals(parentId)) {
                 constraintValidatorContext.disableDefaultConstraintViolation();
                 constraintValidatorContext.buildConstraintViolationWithTemplate("Parent id cannot be equals topic id")
@@ -36,7 +31,7 @@ public class RecursionTopicsDTO implements ConstraintValidator<RecursionValidati
                     .addPropertyNode("parentId").addConstraintViolation();
             return false;
         }
-//        if(!topicsRepository.existsById(Integer.parseInt(topicsDTOValidation.getParentId()))){
+//        if(!topicsRepository.existsById(Integer.parseInt(topicsDTO.getParentId()))){
 //            constraintValidatorContext.disableDefaultConstraintViolation();
 //            constraintValidatorContext.buildConstraintViolationWithTemplate("Parent id does not exist")
 //                    .addPropertyNode("parentId").addConstraintViolation();

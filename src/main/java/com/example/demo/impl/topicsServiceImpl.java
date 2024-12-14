@@ -1,10 +1,8 @@
 package com.example.demo.impl;
 
+import com.example.demo.dto.TopicsDTO;
 import com.example.demo.dto.extended.ExtendedTopicsDTO;
 import com.example.demo.dto.extended.ExtendedQuestions;
-import com.example.demo.dto.topicsDTO.TopicsDTO;
-import com.example.demo.dto.topicsDTO.TopicsDTOValidation;
-import com.example.demo.dto.topicsDTO.UpdateTopicdDTOValidation;
 import com.example.demo.model.Questions;
 import com.example.demo.model.Reactions;
 import com.example.demo.model.Topics;
@@ -12,8 +10,8 @@ import com.example.demo.repository.QuestionsRepository;
 import com.example.demo.repository.ReactionsRepository;
 import com.example.demo.repository.TopicsRepository;
 import com.example.demo.service.TopicsService;
+import jakarta.validation.*;
 import lombok.AllArgsConstructor;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,8 +22,10 @@ import java.util.*;
 @AllArgsConstructor
 public class topicsServiceImpl implements TopicsService {
     private final ReactionsRepository reactionsRepository;
-    TopicsRepository topicsRepository;
-    QuestionsRepository questionsRepository;
+    private Validator validator;
+    private TopicsRepository topicsRepository;
+    private QuestionsRepository questionsRepository;
+
     @Override
     public Page<Topics> findAll(Pageable pageable) {
         return topicsRepository.findAll(pageable);
@@ -37,45 +37,62 @@ public class topicsServiceImpl implements TopicsService {
     }
 
     @Override
-    public Topics saveTopics(TopicsDTOValidation topicsDTOValidation) {
+    public Topics saveTopics(TopicsDTO topicsDTO) {
         Topics topics = new Topics();
-        topics.setDescription(topicsDTOValidation.getDescription());
-        topics.setTitle(topicsDTOValidation.getTitle());
-
-        if (topicsDTOValidation.getParentId() == null){
+        topics.setDescription(topicsDTO.getDescription());
+        topics.setTitle(topicsDTO.getTitle());
+        if (topicsDTO.getParentId() == null){
             topics.setParentId(null);
         }
         else {
-           topics.setParentId(topicsRepository.findById(Integer.valueOf(topicsDTOValidation.getParentId())).get());
+           topics.setParentId(topicsRepository.findById(Integer.valueOf(topicsDTO.getParentId())).get());
         }
         return topicsRepository.save(topics);
     }
 
     @Override
-    public Topics updateTopics(TopicsDTOValidation topicsDTOValidation, Integer id) {
-        Optional<Topics> topics = topicsRepository.findById(id);
-        topics.get().setParentId(topicsRepository.findById(Integer.parseInt(topicsDTOValidation.getParentId())).get());
-        topics.get().setDescription(topicsDTOValidation.getDescription());
-        topics.get().setTitle(topicsDTOValidation.getTitle());
+    public Topics updateTopics(TopicsDTO topicsDTO) {
+        Optional<Topics> topics = topicsRepository.findById(topicsDTO.getId());
+            topics.get().setParentId(topicsRepository.findById(topicsDTO.getParentId()).get());
+            topics.get().setDescription(topicsDTO.getDescription());
+        topics.get().setTitle(topicsDTO.getTitle());
         return topicsRepository.save(topics.get());
     }
 
     @Override
-    public Topics patchTopics(UpdateTopicdDTOValidation topics, Integer id) {
+    public Topics patchTopics(HashMap<String, String> body,Integer id) {
+        TopicsDTO topicsDTO = new TopicsDTO();
+        Optional<Topics> topics = topicsRepository.findById(id);
+        topicsDTO.setId(id);
+        topicsDTO.setParentId(topics.get().getParentId().getId());
+        topicsDTO.setTitle(topics.get().getTitle());
+        topicsDTO.setDescription(topics.get().getDescription());
+        if (body.containsKey("title") && body.get("title") != null){
+            topicsDTO.setTitle(body.get("title"));
+        }
+        if (body.containsKey("description") && body.get("description") != null){
+            topicsDTO.setDescription(body.get("description"));
+        }
+        if (body.containsKey("parentId")){
+            topicsDTO.setParentId(Integer.valueOf(body.get("parentId")));
+        }
+        Set<ConstraintViolation<TopicsDTO>> violations = validator.validate(topicsDTO);
+        if (!violations.isEmpty()){
+            System.out.println(topicsDTO.getParentId());
+            throw new ConstraintViolationException(violations);
+        }
 
-        return null;
+        topics.get().setParentId(topicsRepository.findById(topicsDTO.getParentId()).get());
+        topics.get().setTitle(topicsDTO.getTitle());
+        topics.get().setDescription(topicsDTO.getDescription());
+        return topicsRepository.save(topics.get());
     }
 
     @Override
     public Topics deleteTopics(Integer id) {
-        if (!topicsRepository.existsById(id)){
-            return null;
-        }
-        else {
             Topics topics = topicsRepository.findById(id).get();
             topicsRepository.deleteById(id);
             return topics;
-        }
     }
 
 
