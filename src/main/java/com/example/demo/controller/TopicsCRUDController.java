@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,7 @@ import java.util.*;
         private final TopicsService topicsService;
         Validator validator;
         @GetMapping
-        public ResponseEntity<Page<Topics>> getAllTopics(@RequestParam(required = false) String title,
+        public ResponseEntity<Page<TopicsDTO>> getAllTopics(@RequestParam(required = false) String title,
                                          @RequestParam(defaultValue = "0") int page,
                                          @RequestParam(defaultValue = "10") int size) {
             if (title != null && !title.isEmpty()) {
@@ -56,16 +57,17 @@ import java.util.*;
         }
         @PatchMapping("/{id}")
         public ResponseEntity<?> patchTopics(@PathVariable Integer id, @RequestBody HashMap<String,String> body) {
-                if (body.isEmpty()){
-                    return ResponseEntity.badRequest().build();
-                }
             if (topicsService.findById(id) == null){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id is not exist");
             }
+                if (!body.containsKey("parentId") && !body.containsKey("title") && !body.containsKey("description")){
+                    return ResponseEntity.badRequest().body("Input is empty");
+                }
+
             if (body.containsKey("parentId") && body.get("parentId").equals(id.toString())){
                 return ResponseEntity.badRequest().body("Parent id cannot be equals topic id");
             }
-            Topics topics;
+            TopicsDTO topics;
             try {
                 topics = topicsService.patchTopics(body,id);
             }

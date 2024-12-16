@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 @Component
 @AllArgsConstructor
 public class TopicIdForeignKey implements ConstraintValidator<ValidationQuestionsDTO, Integer> {
-    private QuestionsRepository questionsRepository;
+    private TopicsRepository topicsRepository;
     @Override
     public boolean isValid(Integer id, ConstraintValidatorContext constraintValidatorContext) {
         if (id == null){
             return false;
         }
-        return questionsRepository.existsById(id);
+        return topicsRepository.existsById(id);
     }
 }

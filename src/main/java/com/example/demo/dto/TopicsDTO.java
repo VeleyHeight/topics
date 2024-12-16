@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.example.demo.dto.validation.topics.RecursionValidation;
 import com.example.demo.dto.validation.topics.ValidationTopicsDTO;
 import jakarta.persistence.Transient;
 import jakarta.validation.Valid;
@@ -7,12 +8,19 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.validation.annotation.Validated;
+
+import java.sql.Timestamp;
 
 //@RecursionValidation
+//@Validated
 @Data
 public class TopicsDTO {
     @Valid
-
+    @Transient
+    private Integer id;
     @NotNull(message = "Title is required")
     @NotBlank(message = "Title is blank")
     @Size(min = 5,max = 200,message = "Title size must be between 5 and 200")
@@ -24,5 +32,10 @@ public class TopicsDTO {
     @ValidationTopicsDTO
     private Integer parentId;
     @Transient
-    private Integer id;
+    @CreationTimestamp
+    private Timestamp created_at;
+    @Transient
+    @UpdateTimestamp
+    private Timestamp updated_at;
+
 }

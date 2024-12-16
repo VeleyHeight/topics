@@ -5,12 +5,17 @@ import com.example.demo.model.Questions;
 import com.example.demo.model.Reactions;
 import com.example.demo.model.Topics;
 import com.example.demo.service.ReactionsService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -21,57 +26,57 @@ import java.util.UUID;
 public class ReactionsCRUDController {
     private final ReactionsService reactionsService;
     @GetMapping
-    public ResponseEntity<List<Reactions>> getAllTopics() {
+    public ResponseEntity<List<ReactionsDTO>> getAllTopics() {
         return ResponseEntity.ok(reactionsService.findAll());
     }
     @PostMapping
-    public ResponseEntity<Reactions> createReactions(@RequestBody ReactionsDTO reactionsDTO) {
-        try {
+    public ResponseEntity<ReactionsDTO> createReactions(@Valid @RequestBody ReactionsDTO reactionsDTO) {
             return ResponseEntity.ok(reactionsService.saveReactions(reactionsDTO));
-        }
-        catch (Exception e){
-            return ResponseEntity.notFound().build();
-        }
     }
     @PutMapping("/{id}")
-    public ResponseEntity<Reactions> updateReactions(@RequestBody Reactions reactions) {
-        return ResponseEntity.ok(reactionsService.updateReactions(reactions));
+    public ResponseEntity<?> updateReactions(@PathVariable Integer id,@Valid @RequestBody ReactionsDTO reactionsDTO) {
+        if (reactionsService.findById(id) == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Reactions with this id is not exist");
+        }
+        reactionsDTO.setId(id);
+        return ResponseEntity.ok(reactionsService.updateReactions(reactionsDTO));
     }
     @PatchMapping("/{id}")
-    public ResponseEntity<Reactions> patchReactions(@PathVariable Integer id, @RequestBody Map<String,Object> body) {
+    public ResponseEntity<?> patchReactions(@PathVariable Integer id, @RequestBody HashMap<String,String> body) {
         if (reactionsService.findById(id) == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Reactions with this id is not exist");
         }
-        try{
-            Reactions reactions = reactionsService.findById(id);
-            body.forEach((key, value) -> {
-                switch (key) {
-                    case "user_id":
-                        reactions.setUser_id((UUID)value);
-                        break;
-                    case "type":
-                        reactions.setType((String)value);
-                        break;
-                    case "questions_id":
-                        reactions.setQuestionsId((Questions) value);
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Invalid key: " + key);
-                }
-            });
-            return ResponseEntity.ok(reactionsService.updateReactions(reactions));
+        if(!body.containsKey("user_id") && !body.containsKey("type") && !body.containsKey("questionsId")){
+            return ResponseEntity.badRequest().body("Input is empty");
         }
-        catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+            ReactionsDTO reactions;
+            try {
+                reactions = reactionsService.patchTopics(body,id);
+            }
+            catch (Exception e){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(reactions);
+
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteReactions(@RequestParam Integer id,@RequestBody Reactions reactions) {
+    public ResponseEntity<?> deleteReactions(@RequestParam Integer id,@RequestBody Reactions reactions) {
         if (reactionsService.findById(id) == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Reactions with this id is not exist");
         }
         else {
             return ResponseEntity.ok(reactionsService.deleteReactions(id));
         }
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
     }
 }

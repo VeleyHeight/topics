@@ -11,8 +11,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -21,7 +24,7 @@ import java.util.Map;
 public class QuestionsCRUDController {
     private final QuestionsService questionsService;
     @GetMapping
-    public ResponseEntity<Page<Questions>> getAllQuestions(@RequestParam(required = false) String questions,
+    public ResponseEntity<Page<QuestionsDTO>> getAllQuestions(@RequestParam(required = false) String questions,
                                                            @RequestParam(defaultValue = "0") int page,
                                                            @RequestParam(defaultValue = "10") int size){
         if (questions != null && !questions.isEmpty()){
@@ -41,60 +44,63 @@ public class QuestionsCRUDController {
         }
     }
     @PostMapping
-    public ResponseEntity<Questions> createQuestions(@Valid @RequestBody QuestionsDTO questionsDTO){
+    public ResponseEntity<QuestionsDTO> createQuestions(@Valid @RequestBody QuestionsDTO questionsDTO){
         return ResponseEntity.status(HttpStatus.CREATED).body(questionsService.saveQuestions(questionsDTO));
     }
-    // С этого момента добавить оставшуюся валидацию
     @PutMapping("/{id}")
-    public ResponseEntity<Questions> updateQuestions(@PathVariable Integer id, @RequestBody Questions questions){
-        Questions questionsFind = questionsService.findById(id);
-        if (questionsFind != null){
-            questionsFind.setQuestion(questions.getQuestion());
-            questionsFind.setAnswer(questions.getAnswer());
-            questionsFind.set_popular(questions.is_popular());
-            return ResponseEntity.ok(questionsService.updateQuestions(questions));
+    public ResponseEntity<?> updateQuestions(@PathVariable Integer id,@Valid @RequestBody QuestionsDTO questionsDTO){
+        if (questionsService.findById(id) == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Question with this id is not exist");
         }
-        return ResponseEntity.notFound().build();
+        questionsDTO.setId(id);
+        return ResponseEntity.ok(questionsService.updateQuestions(questionsDTO));
     }
     @PatchMapping("/{id}")
-    public ResponseEntity<Questions> patchQuestions(@PathVariable Integer id, @RequestBody Map<String, Object> body){
-        Questions questions = questionsService.findById(id);
-        if (questions != null){
-            body.forEach((key, value) ->{
-                    switch (key) {
-                        case "questions":
-                            questions.setQuestion((String) value);
-                            break;
-                        case "answer":
-                            questions.setAnswer((String) value);
-                            break;
-                        case "topicId":
-                            questions.setTopicId((Topics) value);
-                            break;
-                        case "is_popular":
-                            questions.set_popular((boolean) value);
-                            break;
-                        default:
-                            throw new IllegalArgumentException("Invalid field: " + key);
-                    }
-            });
-            return ResponseEntity.ok(questionsService.updateQuestions(questions));
+    public ResponseEntity<?> patchQuestions(@PathVariable Integer id, @RequestBody HashMap<String, String> body){
+        if (questionsService.findById(id) == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Question with this id is not exist");
         }
-        else {
-            return ResponseEntity.notFound().build();
+        if (!body.containsKey("questions") && !body.containsKey("answer") && !body.containsKey("topicId") && !body.containsKey("is_popular")){
+            return ResponseEntity.badRequest().body("Input is empty");
         }
+
+        QuestionsDTO questions;
+        try {
+            questions = questionsService.patchTopics(body,id);
+        }
+        catch (Exception e ){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+            return ResponseEntity.ok(questions);
+
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteQuestions(@PathVariable Integer id){
-        try {
-            return ResponseEntity.ok(questionsService.deleteQuestions(id));
+    public ResponseEntity<?> deleteQuestions(@PathVariable Integer id){
+        if (questionsService.findById(id) == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Question with this id does not exist");
         }
-        catch (Exception e) {
-            return ResponseEntity.notFound().build();
+        else {
+            return ResponseEntity.status(HttpStatus.OK).body(questionsService.deleteQuestions(id));
         }
     }
     @GetMapping("extended/{id}")
-    public ResponseEntity<ExtendedTopicsDTO> getQuestionsByIdExtended(@PathVariable Integer id){
-        return ResponseEntity.ok(questionsService.findByIdExtended(id));
+    public ResponseEntity<?> getQuestionsByIdExtended(@PathVariable Integer id){
+        if (questionsService.findById(id) == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Question with this id does not exist");
+        }
+        else {
+            return ResponseEntity.ok(questionsService.findByIdExtended(id));
+        }
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
     }
 }

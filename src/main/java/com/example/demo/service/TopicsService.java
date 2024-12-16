@@ -9,12 +9,12 @@ import org.springframework.data.domain.Pageable;
 import java.util.HashMap;
 
 public interface TopicsService {
-    Page<Topics> findAll(Pageable pageable);
-    Page<Topics> findAllByTitleContainingIgnoreCase(String title, Pageable pageable);
-    Topics saveTopics(TopicsDTO topics);
-    Topics deleteTopics(Integer id);
-    Topics updateTopics(TopicsDTO topics);
-    Topics patchTopics(HashMap<String,String> map, Integer id);
-    Topics findById(Integer id);
+    Page<TopicsDTO> findAll(Pageable pageable);
+    Page<TopicsDTO> findAllByTitleContainingIgnoreCase(String title, Pageable pageable);
+    TopicsDTO saveTopics(TopicsDTO topics);
+    TopicsDTO deleteTopics(Integer id);
+    TopicsDTO updateTopics(TopicsDTO topics);
+    TopicsDTO patchTopics(HashMap<String,String> map, Integer id);
+    TopicsDTO findById(Integer id);
     ExtendedTopicsDTO findByIdExtended(Integer id);
 }

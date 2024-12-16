@@ -1,5 +1,6 @@
 package com.example.demo.impl;
 
+import com.example.demo.dto.QuestionsDTO;
 import com.example.demo.dto.TopicsDTO;
 import com.example.demo.dto.extended.ExtendedTopicsDTO;
 import com.example.demo.dto.extended.ExtendedQuestions;
@@ -25,19 +26,41 @@ public class topicsServiceImpl implements TopicsService {
     private Validator validator;
     private TopicsRepository topicsRepository;
     private QuestionsRepository questionsRepository;
-
+    public Page<TopicsDTO> convertToPageDto(Page<Topics> topicsPage) {
+        Page<TopicsDTO> dtoPage = topicsPage.map(topics -> {
+            TopicsDTO dto = new TopicsDTO();
+            dto.setId(topics.getId());
+            dto.setTitle(topics.getTitle());
+            dto.setDescription(topics.getDescription());
+            dto.setParentId(topics.getParentId().getId());
+            dto.setCreated_at(topics.getCreated_at());
+            dto.setUpdated_at(topics.getUpdated_at());
+            return dto;
+        });
+        return dtoPage;
+    }
+    public TopicsDTO convertToDto(Topics topics) {
+        TopicsDTO dto = new TopicsDTO();
+        dto.setId(topics.getId());
+        dto.setTitle(topics.getTitle());
+        dto.setDescription(topics.getDescription());
+        dto.setParentId(topics.getParentId().getId());
+        dto.setCreated_at(topics.getCreated_at());
+        dto.setUpdated_at(topics.getUpdated_at());
+        return dto;
+    }
     @Override
-    public Page<Topics> findAll(Pageable pageable) {
-        return topicsRepository.findAll(pageable);
+    public Page<TopicsDTO> findAll(Pageable pageable) {
+        return convertToPageDto(topicsRepository.findAll(pageable));
     }
 
     @Override
-    public Page<Topics> findAllByTitleContainingIgnoreCase(String title, Pageable pageable) {
-        return topicsRepository.findAllByTitleContainingIgnoreCase(title, pageable);
+    public Page<TopicsDTO> findAllByTitleContainingIgnoreCase(String title, Pageable pageable) {
+        return convertToPageDto(topicsRepository.findAllByTitleContainingIgnoreCase(title, pageable));
     }
 
     @Override
-    public Topics saveTopics(TopicsDTO topicsDTO) {
+    public TopicsDTO saveTopics(TopicsDTO topicsDTO) {
         Topics topics = new Topics();
         topics.setDescription(topicsDTO.getDescription());
         topics.setTitle(topicsDTO.getTitle());
@@ -47,20 +70,20 @@ public class topicsServiceImpl implements TopicsService {
         else {
            topics.setParentId(topicsRepository.findById(Integer.valueOf(topicsDTO.getParentId())).get());
         }
-        return topicsRepository.save(topics);
+        return convertToDto(topicsRepository.save(topics));
     }
 
     @Override
-    public Topics updateTopics(TopicsDTO topicsDTO) {
+    public TopicsDTO updateTopics(TopicsDTO topicsDTO) {
         Optional<Topics> topics = topicsRepository.findById(topicsDTO.getId());
             topics.get().setParentId(topicsRepository.findById(topicsDTO.getParentId()).get());
             topics.get().setDescription(topicsDTO.getDescription());
         topics.get().setTitle(topicsDTO.getTitle());
-        return topicsRepository.save(topics.get());
+        return convertToDto(topicsRepository.save(topics.get()));
     }
 
     @Override
-    public Topics patchTopics(HashMap<String, String> body,Integer id) {
+    public TopicsDTO patchTopics(HashMap<String, String> body,Integer id) {
         TopicsDTO topicsDTO = new TopicsDTO();
         Optional<Topics> topics = topicsRepository.findById(id);
         topicsDTO.setId(id);
@@ -78,27 +101,29 @@ public class topicsServiceImpl implements TopicsService {
         }
         Set<ConstraintViolation<TopicsDTO>> violations = validator.validate(topicsDTO);
         if (!violations.isEmpty()){
-            System.out.println(topicsDTO.getParentId());
             throw new ConstraintViolationException(violations);
         }
-
         topics.get().setParentId(topicsRepository.findById(topicsDTO.getParentId()).get());
         topics.get().setTitle(topicsDTO.getTitle());
         topics.get().setDescription(topicsDTO.getDescription());
-        return topicsRepository.save(topics.get());
+        topicsRepository.save(topics.get());
+        return topicsDTO;
     }
 
     @Override
-    public Topics deleteTopics(Integer id) {
+    public TopicsDTO deleteTopics(Integer id) {
             Topics topics = topicsRepository.findById(id).get();
             topicsRepository.deleteById(id);
-            return topics;
+            return convertToDto(topics);
     }
 
-
     @Override
-    public Topics findById(Integer id) {
-        return topicsRepository.findById(id).orElse(null);
+    public TopicsDTO findById(Integer id) {
+        Topics topics = topicsRepository.findById(id).orElse(null);
+        if(topics == null){
+            return null;
+        }
+        return convertToDto(topics);
     }
 
     @Override

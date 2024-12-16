@@ -7,10 +7,16 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.sql.Timestamp;
 
 @Data
 public class QuestionsDTO {
     @Valid
+    @Transient
+    private Integer id;
             @NotNull(message = "Question is required")
             @NotBlank(message = "Question is blank")
     @Size(max = 1000,message = "Question size must be between 5 and 10000")
@@ -24,5 +30,10 @@ public class QuestionsDTO {
     @ValidationQuestionsDTO
     Integer topicId;
     @Transient
-    private Integer id;
+    @CreationTimestamp
+    private Timestamp created_at;
+    @Transient
+    @UpdateTimestamp
+    private Timestamp updated_at;
+
 }
