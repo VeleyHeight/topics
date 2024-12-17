@@ -1,4 +1,4 @@
-package com.example.demo.dto.validation.topics;
+package com.example.demo.validation.topics;
 
 import com.example.demo.dto.TopicsDTO;
 import com.example.demo.repository.TopicsRepository;

@@ -13,6 +13,8 @@ import com.example.demo.repository.TopicsRepository;
 import com.example.demo.service.TopicsService;
 import jakarta.validation.*;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import java.util.*;
 @Service
 @AllArgsConstructor
 public class topicsServiceImpl implements TopicsService {
+    private static final Logger log = LoggerFactory.getLogger(topicsServiceImpl.class);
     private final ReactionsRepository reactionsRepository;
     private Validator validator;
     private TopicsRepository topicsRepository;
@@ -32,7 +35,12 @@ public class topicsServiceImpl implements TopicsService {
             dto.setId(topics.getId());
             dto.setTitle(topics.getTitle());
             dto.setDescription(topics.getDescription());
-            dto.setParentId(topics.getParentId().getId());
+            if(topics.getParentId() != null) {
+                dto.setParentId(topics.getParentId().getId());
+            }
+            else {
+                dto.setParentId(null);
+            }
             dto.setCreated_at(topics.getCreated_at());
             dto.setUpdated_at(topics.getUpdated_at());
             return dto;
@@ -44,7 +52,12 @@ public class topicsServiceImpl implements TopicsService {
         dto.setId(topics.getId());
         dto.setTitle(topics.getTitle());
         dto.setDescription(topics.getDescription());
-        dto.setParentId(topics.getParentId().getId());
+        if(topics.getParentId() != null) {
+            dto.setParentId(topics.getParentId().getId());
+        }
+        else {
+            dto.setParentId(null);
+        }
         dto.setCreated_at(topics.getCreated_at());
         dto.setUpdated_at(topics.getUpdated_at());
         return dto;
@@ -68,7 +81,15 @@ public class topicsServiceImpl implements TopicsService {
             topics.setParentId(null);
         }
         else {
-           topics.setParentId(topicsRepository.findById(Integer.valueOf(topicsDTO.getParentId())).get());
+            Optional<Topics> topicsOptional = topicsRepository.findById(topicsDTO.getParentId());
+            if(topicsOptional.isPresent()) {
+                topics.setParentId(topicsOptional.get());
+            }
+            else{
+                topics.setParentId(null);
+            }
+
+
         }
         return convertToDto(topicsRepository.save(topics));
     }

@@ -1,6 +1,6 @@
 package com.example.demo.dto;
 
-import com.example.demo.dto.validation.questions.ValidationQuestionsDTO;
+import com.example.demo.validation.questions.ValidationQuestionsDTO;
 import jakarta.persistence.Transient;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;

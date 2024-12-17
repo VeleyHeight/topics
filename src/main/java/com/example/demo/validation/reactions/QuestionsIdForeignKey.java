@@ -1,4 +1,4 @@
-package com.example.demo.dto.validation.reactions;
+package com.example.demo.validation.reactions;
 
 import com.example.demo.repository.QuestionsRepository;
 import jakarta.validation.ConstraintValidator;
