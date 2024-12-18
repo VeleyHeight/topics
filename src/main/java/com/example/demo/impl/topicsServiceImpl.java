@@ -82,14 +82,7 @@ public class topicsServiceImpl implements TopicsService {
         }
         else {
             Optional<Topics> topicsOptional = topicsRepository.findById(topicsDTO.getParentId());
-            if(topicsOptional.isPresent()) {
                 topics.setParentId(topicsOptional.get());
-            }
-            else{
-                topics.setParentId(null);
-            }
-
-
         }
         return convertToDto(topicsRepository.save(topics));
     }

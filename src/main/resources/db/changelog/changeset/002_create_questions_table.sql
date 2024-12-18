@@ -1,7 +1,7 @@
 --liquibase formatted sql
 --changeset postgres:002_create_questions_table
 
-CREATE TABLE questions (
+CREATE TABLE if not exists questions (
                            id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                            question TEXT,
                            answer TEXT,
