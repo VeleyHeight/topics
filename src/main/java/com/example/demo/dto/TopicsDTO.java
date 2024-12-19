@@ -28,7 +28,7 @@ public class TopicsDTO {
     @NotBlank(message = "Description is blank")
     @Size(min = 5,max = 200,message = "Description size must be between 5 and 200")
     private String description;
-//    @ValidationTopicsDTO
+    @ValidationTopicsDTO
     private Integer parentId;
     @Transient
     @CreationTimestamp

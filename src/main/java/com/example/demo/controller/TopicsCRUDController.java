@@ -1,12 +1,22 @@
 package com.example.demo.controller;
 
+import com.example.demo.client.GetCityWeather;
+import com.example.demo.client.GetWeather;
 import com.example.demo.dto.TopicsDTO;
+import com.example.demo.dto.WeatherCityDTO;
+import com.example.demo.dto.WeatherDTO;
 import com.example.demo.model.Topics;
 import com.example.demo.service.TopicsService;
 import jakarta.validation.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -21,7 +31,38 @@ import java.util.*;
     @RequestMapping("/topics")
     public class TopicsCRUDController {
         private final TopicsService topicsService;
-        Validator validator;
+        private final GetCityWeather getCityWeather;
+        private final GetWeather getWeather;
+        @GetMapping("/weather")
+        public ResponseEntity<?> getCity(@Valid @RequestParam @NotBlank @NotNull String city) {
+            try {
+                List<WeatherCityDTO> weatherCityDTOList = getCityWeather.getGeoByCity(city, 1, GetCityWeather.api);
+                if (weatherCityDTOList != null && !weatherCityDTOList.isEmpty()) {
+                    Double latitude = weatherCityDTOList.get(0).getLat();
+                    Double longitude = weatherCityDTOList.get(0).getLon();
+                    try {
+                        WeatherDTO weatherDTOList = getWeather.getWeather(latitude, longitude, GetWeather.api, "metric");
+                        if (weatherDTOList != null) {
+                            HashMap<String, Object> response = new HashMap<>();
+                            response.put("Weather", weatherDTOList.getWeather()[0].getMain());
+                            response.put("Description", weatherDTOList.getWeather()[0].getDescription());
+                            response.put("Temp", weatherDTOList.getMain().getTemp());
+                            response.put("Pressure", weatherDTOList.getMain().getPressure());
+                            return ResponseEntity.ok(response);
+                        }
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Weather not found");
+                    }
+                    catch (Exception e){
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error getting weather for the entered city");
+                    }
+                } else {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("City not found");
+                }
+            }
+            catch (Exception e){
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error getting geo coordinates for the entered city");
+            }
+        }
         @GetMapping
         public ResponseEntity<Page<TopicsDTO>> getAllTopics(@RequestParam(required = false) String title,
                                          @RequestParam(defaultValue = "0") int page,
