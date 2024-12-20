@@ -31,37 +31,9 @@ import java.util.*;
     @RequestMapping("/topics")
     public class TopicsCRUDController {
         private final TopicsService topicsService;
-        private final GetCityWeather getCityWeather;
-        private final GetWeather getWeather;
         @GetMapping("/weather")
-        public ResponseEntity<?> getCity(@Valid @RequestParam @NotBlank @NotNull String city) {
-            try {
-                List<WeatherCityDTO> weatherCityDTOList = getCityWeather.getGeoByCity(city, 1, GetCityWeather.api);
-                if (weatherCityDTOList != null && !weatherCityDTOList.isEmpty()) {
-                    Double latitude = weatherCityDTOList.get(0).getLat();
-                    Double longitude = weatherCityDTOList.get(0).getLon();
-                    try {
-                        WeatherDTO weatherDTOList = getWeather.getWeather(latitude, longitude, GetWeather.api, "metric");
-                        if (weatherDTOList != null) {
-                            HashMap<String, Object> response = new HashMap<>();
-                            response.put("Weather", weatherDTOList.getWeather()[0].getMain());
-                            response.put("Description", weatherDTOList.getWeather()[0].getDescription());
-                            response.put("Temp", weatherDTOList.getMain().getTemp());
-                            response.put("Pressure", weatherDTOList.getMain().getPressure());
-                            return ResponseEntity.ok(response);
-                        }
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Weather not found");
-                    }
-                    catch (Exception e){
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error getting weather for the entered city");
-                    }
-                } else {
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("City not found");
-                }
-            }
-            catch (Exception e){
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error getting geo coordinates for the entered city");
-            }
+        public ResponseEntity<?> getWeatherInCity(@Valid @RequestParam @NotBlank @NotNull String city) {
+            return topicsService.getWeatherInCity(city);
         }
         @GetMapping
         public ResponseEntity<Page<TopicsDTO>> getAllTopics(@RequestParam(required = false) String title,
