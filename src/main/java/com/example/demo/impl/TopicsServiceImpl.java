@@ -199,5 +199,4 @@ public class TopicsServiceImpl implements TopicsService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error getting geo for the entered city");
         }
     }
-
 }
