@@ -1,5 +1,6 @@
 package com.example.demo.impl;
 
+import com.example.demo.dto.ReactionsDTO;
 import com.example.demo.dto.TopicsDTO;
 import com.example.demo.dto.extended.ExtendedQuestions;
 import com.example.demo.dto.extended.ExtendedTopicsDTO;
@@ -27,7 +28,9 @@ public class questionsServiceImpl implements QuestionsService {
     private QuestionsRepository questionsRepository;
     private TopicsRepository topicsRepository;
     private ReactionsRepository reactionsRepository;
+    private reactionsServiceImpl reactionsService;
     private Validator validator;
+    private TopicsServiceImpl topicsService;
 
     public Page<QuestionsDTO> convertToPageDto(Page<Questions> questionsPage) {
         Page<QuestionsDTO> dtoPage = questionsPage.map(question -> {
@@ -139,9 +142,9 @@ public class questionsServiceImpl implements QuestionsService {
             questionsList.add(optionalQuestions.get());
             topics = topicsRepository.findAllByQuestions(questionsList);
             List<ExtendedQuestions> extendedQuestionsList = new ArrayList<>();
-            List<Reactions> reactionsList = reactionsRepository.findAllByQuestionsId(optionalQuestions.get());
+            List<ReactionsDTO> reactionsList = reactionsService.convertToListDto(reactionsRepository.findAllByQuestionsId(optionalQuestions.get()));
             extendedQuestionsList.add(new ExtendedQuestions(optionalQuestions.get().getId(),optionalQuestions.get().getQuestion(),optionalQuestions.get().getAnswer(),optionalQuestions.get().is_popular(),reactionsList));
-            ExtendedTopicsDTO extendedTopicsDTO = new ExtendedTopicsDTO(topics,extendedQuestionsList);
+            ExtendedTopicsDTO extendedTopicsDTO = new ExtendedTopicsDTO(topicsService.convertToDto(topics),extendedQuestionsList);
             return extendedTopicsDTO;
         }
         else {

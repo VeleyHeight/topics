@@ -1,5 +1,6 @@
 package com.example.demo.dto.extended;
 
+import com.example.demo.dto.TopicsDTO;
 import com.example.demo.model.Topics;
 import lombok.Data;
 
@@ -14,10 +15,10 @@ public class ExtendedTopicsDTO {
     String description;
     Timestamp created_at;
     Timestamp updated_at;
-    Topics parentId;
+    Integer parentId;
     List<ExtendedQuestions> questions = new ArrayList<>();
 
-    public ExtendedTopicsDTO(Topics topics, List<ExtendedQuestions> questionsList) {
+    public ExtendedTopicsDTO(TopicsDTO topics, List<ExtendedQuestions> questionsList) {
         this.id = topics.getId();
         this.title = topics.getTitle();
         this.description = topics.getDescription();
@@ -26,7 +27,7 @@ public class ExtendedTopicsDTO {
         this.parentId = topics.getParentId();
         this.questions = questionsList;
     }
-    public ExtendedTopicsDTO(Topics topics){
+    public ExtendedTopicsDTO(TopicsDTO topics){
         this.id = topics.getId();
         this.title = topics.getTitle();
         this.description = topics.getDescription();

@@ -2,6 +2,7 @@ package com.example.demo.impl;
 
 import com.example.demo.client.GetCityWeather;
 import com.example.demo.client.GetWeather;
+import com.example.demo.dto.ReactionsDTO;
 import com.example.demo.dto.TopicsDTO;
 import com.example.demo.dto.WeatherCityDTO;
 import com.example.demo.dto.WeatherDTO;
@@ -13,6 +14,7 @@ import com.example.demo.model.Topics;
 import com.example.demo.repository.QuestionsRepository;
 import com.example.demo.repository.ReactionsRepository;
 import com.example.demo.repository.TopicsRepository;
+import com.example.demo.service.ReactionsService;
 import com.example.demo.service.TopicsService;
 import jakarta.validation.*;
 import lombok.AllArgsConstructor;
@@ -31,6 +33,7 @@ import java.util.*;
 public class TopicsServiceImpl implements TopicsService {
     private static final Logger log = LoggerFactory.getLogger(TopicsServiceImpl.class);
     private final ReactionsRepository reactionsRepository;
+    private final reactionsServiceImpl reactionsService;
     private Validator validator;
     private TopicsRepository topicsRepository;
     private QuestionsRepository questionsRepository;
@@ -155,15 +158,15 @@ public class TopicsServiceImpl implements TopicsService {
             List<Questions> questionsList = questionsRepository.findByTopicId(topics.get());
             if (!questionsList.isEmpty()){
                 List<ExtendedQuestions> extendedQuestionsList = new ArrayList<>();
-                List<Reactions> reactionsList;
+                List<ReactionsDTO> reactionsList;
                 for(Questions questions: questionsList){
-                    reactionsList = reactionsRepository.findAllByQuestionsId(questions);
+                    reactionsList = reactionsService.convertToListDto(reactionsRepository.findAllByQuestionsId(questions));
                     extendedQuestionsList.add(new ExtendedQuestions(questions.getId(),questions.getQuestion(),questions.getAnswer(),questions.is_popular(),reactionsList));
                 }
-                extendedTopicsDTO = new ExtendedTopicsDTO(topics.get(),extendedQuestionsList);
+                extendedTopicsDTO = new ExtendedTopicsDTO(convertToDto(topics.get()),extendedQuestionsList);
             }
             else {
-                extendedTopicsDTO = new ExtendedTopicsDTO(topics.get());
+                extendedTopicsDTO = new ExtendedTopicsDTO(convertToDto(topics.get()));
             }
         }
         else {
