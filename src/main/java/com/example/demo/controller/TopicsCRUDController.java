@@ -59,11 +59,11 @@ import java.util.*;
         }
         @PutMapping("/{id}")
         public ResponseEntity<?> updateTopics(@PathVariable Integer id,  @Valid @RequestBody TopicsDTO topicsDTO) {
-            if (topicsDTO.getParentId().equals(id)){
-                return ResponseEntity.badRequest().body("Parent id cannot be equals topic id");
-            }
             if (topicsService.findById(id) == null){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id is not exist");
+            }
+            if (topicsDTO.getParentId() != null && topicsDTO.getParentId().equals(id)){
+                return ResponseEntity.badRequest().body("Parent id cannot be equals topic id");
             }
                 topicsDTO.setId(id);
                 return ResponseEntity.ok(topicsService.updateTopics(topicsDTO));
@@ -77,7 +77,7 @@ import java.util.*;
                     return ResponseEntity.badRequest().body("Input is empty");
                 }
 
-            if (body.containsKey("parentId") && body.get("parentId").equals(id.toString())){
+            if (body.containsKey("parentId") && body.get("parentId") != null && body.get("parentId").equals(id.toString())){
                 return ResponseEntity.badRequest().body("Parent id cannot be equals topic id");
             }
             TopicsDTO topics;

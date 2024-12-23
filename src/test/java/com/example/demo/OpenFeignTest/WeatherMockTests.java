@@ -70,10 +70,11 @@ class WeatherMockTests {
             mockMvc.perform(MockMvcRequestBuilders.get("/topics/weather")
                             .contentType("application/json").param("city", city))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.Weather").exists())
-                    .andExpect(jsonPath("$.Description").exists())
-                    .andExpect(jsonPath("$.Temp").isNumber())
-                    .andExpect(jsonPath("$.Pressure").isNumber());
+                    .andExpect(jsonPath("$.Weather").value("Clear"))
+                    .andExpect(jsonPath("$.Description").value("clear sky"))
+                    .andExpect(jsonPath("$.Temp").value("11.6"))
+                    .andExpect(jsonPath("$.Pressure").value(1025));
+            System.out.println(response);
         }
 
         @Test
@@ -85,6 +86,7 @@ class WeatherMockTests {
             mockMvc.perform(MockMvcRequestBuilders.get("/topics/weather")
                             .contentType("application/json").param("city", city))
                     .andExpect(status().is4xxClientError());
+            System.out.println(responseEntity);
         }
 
         @Test
@@ -96,30 +98,7 @@ class WeatherMockTests {
             mockMvc.perform(MockMvcRequestBuilders.get("/topics/weather")
                             .contentType("application/json").param("city", city))
                     .andExpect(status().is4xxClientError());
-        }
-    }
-    @Nested
-    @DisplayName("Тестирование сервиса по получению погоды для заданного города")
-    public class serviceTests {
-        @Test
-        @DisplayName("Существующий город")
-        public void serviceCorrect() {
-            Mockito.when(getCityWeather.getGeoByCity(city,1,GetCityWeather.api)).thenReturn(weatherCityDTO);
-            Mockito.when(getWeather.getWeather(weatherCityDTO.get(0).getLat(),weatherCityDTO.get(0).getLon(),GetWeather.api,"metric")).thenReturn(weatherDTO);
-            ResponseEntity<?> response = topicsService.getWeatherInCity(city);
-            Assertions.assertNotNull(response);
-            Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
-            System.out.println(topicsService.getWeatherInCity(city));
-        }
-        @Test
-        @DisplayName("Не существующий город")
-        public void serviceIncorrect() {
-            city = "Неизвестный";
-            Mockito.when(getCityWeather.getGeoByCity(city,1,GetCityWeather.api)).thenReturn(new ArrayList<>());
-            ResponseEntity<?> response = topicsService.getWeatherInCity(city);
-            Assertions.assertNotNull(response);
-            Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-            System.out.println(topicsService.getWeatherInCity(city));
+            System.out.println(responseEntity);
         }
     }
     @Nested
@@ -159,6 +138,30 @@ class WeatherMockTests {
             Assertions.assertNotNull(weatherCityDTO.get(0).getLat());
             Assertions.assertNotNull(weatherCityDTO.get(0).getLon());
             System.out.println(weatherCityDTO.get(0));
+        }
+    }
+    @Nested
+    @DisplayName("Тестирование сервиса по получению погоды для заданного города")
+    public class serviceTests {
+        @Test
+        @DisplayName("Существующий город")
+        public void serviceCorrect() {
+            Mockito.when(getCityWeather.getGeoByCity(city,1,GetCityWeather.api)).thenReturn(weatherCityDTO);
+            Mockito.when(getWeather.getWeather(weatherCityDTO.get(0).getLat(),weatherCityDTO.get(0).getLon(),GetWeather.api,"metric")).thenReturn(weatherDTO);
+            ResponseEntity<?> response = topicsService.getWeatherInCity(city);
+            Assertions.assertNotNull(response);
+            Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
+            System.out.println(topicsService.getWeatherInCity(city));
+        }
+        @Test
+        @DisplayName("Не существующий город")
+        public void serviceIncorrect() {
+            city = "Неизвестный";
+            Mockito.when(getCityWeather.getGeoByCity(city,1,GetCityWeather.api)).thenReturn(new ArrayList<>());
+            ResponseEntity<?> response = topicsService.getWeatherInCity(city);
+            Assertions.assertNotNull(response);
+            Assertions.assertTrue(response.getStatusCode().is4xxClientError());
+            System.out.println(topicsService.getWeatherInCity(city));
         }
     }
 }

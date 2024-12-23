@@ -100,8 +100,13 @@ public class TopicsServiceImpl implements TopicsService {
     @Override
     public TopicsDTO updateTopics(TopicsDTO topicsDTO) {
         Optional<Topics> topics = topicsRepository.findById(topicsDTO.getId());
+        if(topicsDTO.getParentId() != null) {
             topics.get().setParentId(topicsRepository.findById(topicsDTO.getParentId()).get());
-            topics.get().setDescription(topicsDTO.getDescription());
+        }
+        else {
+            topics.get().setParentId(null);
+        }
+        topics.get().setDescription(topicsDTO.getDescription());
         topics.get().setTitle(topicsDTO.getTitle());
         return convertToDto(topicsRepository.save(topics.get()));
     }
@@ -111,7 +116,12 @@ public class TopicsServiceImpl implements TopicsService {
         TopicsDTO topicsDTO = new TopicsDTO();
         Optional<Topics> topics = topicsRepository.findById(id);
         topicsDTO.setId(id);
-        topicsDTO.setParentId(topics.get().getParentId().getId());
+        if (topics.get().getParentId() != null) {
+            topicsDTO.setParentId(topics.get().getParentId().getId());
+        }
+        else {
+            topicsDTO.setParentId(null);
+        }
         topicsDTO.setTitle(topics.get().getTitle());
         topicsDTO.setDescription(topics.get().getDescription());
         if (body.containsKey("title") && body.get("title") != null){
@@ -127,10 +137,17 @@ public class TopicsServiceImpl implements TopicsService {
         if (!violations.isEmpty()){
             throw new ConstraintViolationException(violations);
         }
-        topics.get().setParentId(topicsRepository.findById(topicsDTO.getParentId()).get());
+        if (topicsDTO.getParentId() != null) {
+            topics.get().setParentId(topicsRepository.findById(topicsDTO.getParentId()).get());
+        }
+        else {
+            topics.get().setParentId(null);
+        }
         topics.get().setTitle(topicsDTO.getTitle());
         topics.get().setDescription(topicsDTO.getDescription());
         topicsRepository.save(topics.get());
+        topicsDTO.setCreated_at(topics.get().getCreated_at());
+        topicsDTO.setUpdated_at(topics.get().getUpdated_at());
         return topicsDTO;
     }
 
