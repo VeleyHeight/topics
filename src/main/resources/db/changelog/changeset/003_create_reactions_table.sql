@@ -6,6 +6,5 @@ create table if not exists reactions(
     questions_id INT,
     user_id UUID,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_reactions_questions FOREIGN KEY (questions_id) REFERENCES questions(id)
-
+    CONSTRAINT fk_reactions_questions FOREIGN KEY (questions_id) REFERENCES questions(id) on delete cascade
 );

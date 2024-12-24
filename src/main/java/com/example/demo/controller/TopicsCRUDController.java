@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
+import org.springframework.boot.context.properties.bind.Nested;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -65,18 +66,17 @@ import java.util.*;
             if (topicsDTO.getParentId() != null && topicsDTO.getParentId().equals(id)){
                 return ResponseEntity.badRequest().body("Parent id cannot be equals topic id");
             }
-                topicsDTO.setId(id);
-                return ResponseEntity.ok(topicsService.updateTopics(topicsDTO));
+            topicsDTO.setId(id);
+            return ResponseEntity.ok(topicsService.updateTopics(topicsDTO));
         }
         @PatchMapping("/{id}")
         public ResponseEntity<?> patchTopics(@PathVariable Integer id, @RequestBody HashMap<String,String> body) {
             if (topicsService.findById(id) == null){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id is not exist");
             }
-                if (!body.containsKey("parentId") && !body.containsKey("title") && !body.containsKey("description")){
-                    return ResponseEntity.badRequest().body("Input is empty");
-                }
-
+            if (!body.containsKey("parentId") && !body.containsKey("title") && !body.containsKey("description")){
+                return ResponseEntity.badRequest().body("Input is empty");
+            }
             if (body.containsKey("parentId") && body.get("parentId") != null && body.get("parentId").equals(id.toString())){
                 return ResponseEntity.badRequest().body("Parent id cannot be equals topic id");
             }
@@ -84,7 +84,7 @@ import java.util.*;
             try {
                 topics = topicsService.patchTopics(body,id);
             }
-            catch (Exception e ){
+            catch (Exception e){
                 return ResponseEntity.badRequest().body(e.getMessage());
             }
             return ResponseEntity.status(HttpStatus.OK).body(topics);
@@ -95,7 +95,7 @@ import java.util.*;
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id does not exist");
             }
             else {
-                return ResponseEntity.status(HttpStatus.OK).body(topicsService.deleteTopics(id));
+                    return ResponseEntity.status(HttpStatus.OK).body(topicsService.deleteTopics(id));
             }
         }
         @GetMapping("/extended/{id}")

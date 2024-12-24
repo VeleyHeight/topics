@@ -63,16 +63,14 @@ public class QuestionsCRUDController {
         if (!body.containsKey("questions") && !body.containsKey("answer") && !body.containsKey("topicId") && !body.containsKey("is_popular")){
             return ResponseEntity.badRequest().body("Input is empty");
         }
-
         QuestionsDTO questions;
         try {
             questions = questionsService.patchTopics(body,id);
         }
-        catch (Exception e ){
+        catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
             return ResponseEntity.ok(questions);
-
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteQuestions(@PathVariable Integer id){

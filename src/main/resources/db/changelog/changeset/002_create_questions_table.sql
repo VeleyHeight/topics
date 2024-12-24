@@ -9,7 +9,7 @@ CREATE TABLE if not exists questions (
                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                            topic_id INTEGER NOT NULL,
-                           CONSTRAINT fk_questions_topics FOREIGN KEY (topic_id) REFERENCES topics(id)
+                           CONSTRAINT fk_questions_topics FOREIGN KEY (topic_id) REFERENCES topics(id) on delete cascade
 );
 
 -- CREATE OR REPLACE FUNCTION update_modified_column()

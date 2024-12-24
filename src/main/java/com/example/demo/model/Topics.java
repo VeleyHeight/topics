@@ -8,6 +8,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
@@ -29,8 +31,9 @@ public class Topics {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id",nullable = true)
     private Topics parentId ;
-    @OneToMany(mappedBy = "topicId")
+    @OneToMany(mappedBy = "topicId", cascade = CascadeType.ALL)
     @JsonIgnore
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Questions> questions;
     @CreationTimestamp
     private Timestamp created_at;
