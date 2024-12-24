@@ -9,9 +9,14 @@ import java.util.List;
 
 public interface ReactionsService {
     List<ReactionsDTO> findAll();
+
     ReactionsDTO saveReactions(ReactionsDTO reactionsDTO);
+
     ReactionsDTO deleteReactions(Integer id);
+
     ReactionsDTO updateReactions(ReactionsDTO reactions);
-    ReactionsDTO patchTopics(HashMap<String,String> map, Integer id);
+
+    ReactionsDTO patchTopics(HashMap<String, String> map, Integer id);
+
     ReactionsDTO findById(Integer id);
 }

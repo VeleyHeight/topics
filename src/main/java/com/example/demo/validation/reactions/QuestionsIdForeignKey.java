@@ -8,11 +8,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
-public class QuestionsIdForeignKey implements ConstraintValidator<ValidationReactionsDTO,Integer> {
+public class QuestionsIdForeignKey implements ConstraintValidator<ValidationReactionsDTO, Integer> {
     QuestionsRepository repository;
+
     @Override
     public boolean isValid(Integer integer, ConstraintValidatorContext constraintValidatorContext) {
-        if(integer == null){
+        if (integer == null) {
             return false;
         }
         return repository.existsById(integer);

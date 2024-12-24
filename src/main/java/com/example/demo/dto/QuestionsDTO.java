@@ -17,13 +17,13 @@ public class QuestionsDTO {
     @Valid
     @Transient
     private Integer id;
-            @NotNull(message = "Question is required")
-            @NotBlank(message = "Question is blank")
-    @Size(max = 1000,message = "Question size must be between 5 and 10000")
+    @NotNull(message = "Question is required")
+    @NotBlank(message = "Question is blank")
+    @Size(max = 1000, message = "Question size must be between 5 and 10000")
     String question;
     @NotNull(message = "Answer is required")
     @NotBlank(message = "Answer is blank")
-    @Size(max = 10000,message = "Answer size must be between 5 and 10000")
+    @Size(max = 10000, message = "Answer size must be between 5 and 10000")
     String answer;
     boolean is_popular;
     @NotNull

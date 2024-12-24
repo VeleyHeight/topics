@@ -29,8 +29,8 @@ public class Topics {
     @Column(columnDefinition = "VARCHAR(255)")
     private String description;
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "parent_id",nullable = true)
-    private Topics parentId ;
+    @JoinColumn(name = "parent_id", nullable = true)
+    private Topics parentId;
     @OneToMany(mappedBy = "topicId", cascade = CascadeType.ALL)
     @JsonIgnore
     @OnDelete(action = OnDeleteAction.CASCADE)

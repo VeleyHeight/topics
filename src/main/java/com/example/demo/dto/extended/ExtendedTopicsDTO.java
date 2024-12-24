@@ -27,7 +27,8 @@ public class ExtendedTopicsDTO {
         this.parentId = topics.getParentId();
         this.questions = questionsList;
     }
-    public ExtendedTopicsDTO(TopicsDTO topics){
+
+    public ExtendedTopicsDTO(TopicsDTO topics) {
         this.id = topics.getId();
         this.title = topics.getTitle();
         this.description = topics.getDescription();

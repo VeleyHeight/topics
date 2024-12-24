@@ -11,11 +11,18 @@ import java.util.HashMap;
 
 public interface QuestionsService {
     Page<QuestionsDTO> findAll(Pageable pageable);
+
     Page<QuestionsDTO> findAllByQuestionContainingIgnoreCase(String title, Pageable pageable);
+
     QuestionsDTO saveQuestions(QuestionsDTO questionsDTO);
+
     QuestionsDTO deleteQuestions(Integer id);
+
     QuestionsDTO updateQuestions(QuestionsDTO questions);
-    QuestionsDTO patchTopics(HashMap<String,String> map, Integer id);
+
+    QuestionsDTO patchTopics(HashMap<String, String> map, Integer id);
+
     QuestionsDTO findById(Integer id);
+
     ExtendedTopicsDTO findByIdExtended(Integer id);
 }

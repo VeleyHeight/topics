@@ -36,6 +36,7 @@ class WeatherBeanTests {
     private TopicsCRUDController topicsCRUDController;
     @Autowired
     private MockMvc mockMvc;
+
     @Nested
     @DisplayName("Тестирование контроллера")
     public class controllerTested {
@@ -69,6 +70,7 @@ class WeatherBeanTests {
                     .andExpect(status().is4xxClientError());
         }
     }
+
     @Nested
     @DisplayName("Тестирование тонких клиентов")
     public class clientTested {
@@ -76,36 +78,39 @@ class WeatherBeanTests {
         @DisplayName("Получение погоды для существующего города")
         public void getWeatherAndGeo() {
             String city = "Ярославль";
-            List<WeatherCityDTO> weatherCityDTO = getCityWeather.getGeoByCity(city,1,GetCityWeather.api);
+            List<WeatherCityDTO> weatherCityDTO = getCityWeather.getGeoByCity(city, 1, GetCityWeather.api);
             Assertions.assertNotNull(weatherCityDTO);
             Assertions.assertTrue(!weatherCityDTO.isEmpty());
             Assertions.assertNotNull(weatherCityDTO.get(0).getLat());
             Assertions.assertNotNull(weatherCityDTO.get(0).getLon());
             System.out.println(weatherCityDTO.get(0));
-            WeatherDTO weatherDTO = getWeather.getWeather(weatherCityDTO.get(0).getLat(),weatherCityDTO.get(0).getLon(),GetWeather.api,"metric");
+            WeatherDTO weatherDTO = getWeather.getWeather(weatherCityDTO.get(0).getLat(), weatherCityDTO.get(0).getLon(), GetWeather.api, "metric");
             Assertions.assertNotNull(weatherDTO);
             Assertions.assertNotNull(weatherDTO.getMain());
             Assertions.assertTrue(weatherDTO.getWeather().length > 0);
             System.out.println(weatherDTO);
         }
+
         @Test
         @DisplayName("Получение погоды по координатам")
-        public void getWeather(){
-            WeatherDTO weatherDTO = getWeather.getWeather(55.7504461,37.6174943,GetWeather.api,"metric");
+        public void getWeather() {
+            WeatherDTO weatherDTO = getWeather.getWeather(55.7504461, 37.6174943, GetWeather.api, "metric");
             Assertions.assertNotNull(weatherDTO);
             System.out.println(weatherDTO);
         }
+
         @Test
         @DisplayName("Получение координат по названию города")
-        public void getCity(){
+        public void getCity() {
             String city = "Ярославль";
-            List<WeatherCityDTO> weatherCityDTO = getCityWeather.getGeoByCity(city,1,GetCityWeather.api);
+            List<WeatherCityDTO> weatherCityDTO = getCityWeather.getGeoByCity(city, 1, GetCityWeather.api);
             Assertions.assertTrue(!weatherCityDTO.isEmpty());
             Assertions.assertNotNull(weatherCityDTO.get(0).getLat());
             Assertions.assertNotNull(weatherCityDTO.get(0).getLon());
             System.out.println(weatherCityDTO.get(0));
         }
     }
+
     @Nested
     @DisplayName("Тестирование сервиса по получению погоды для заданного города")
     public class serviceTests {
@@ -118,6 +123,7 @@ class WeatherBeanTests {
             Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
             System.out.println(topicsService.getWeatherInCity(city));
         }
+
         @Test
         @DisplayName("Не существующий город")
         public void serviceIncorrect() {

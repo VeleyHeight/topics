@@ -13,5 +13,6 @@ import java.util.List;
 @Table(name = "questions")
 public interface QuestionsRepository extends JpaRepository<Questions, Integer> {
     Page<Questions> findAllByQuestionContainingIgnoreCase(String title, Pageable pageable);
+
     List<Questions> findByTopicId(Topics topicId);
 }

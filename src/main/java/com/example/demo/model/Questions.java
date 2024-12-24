@@ -36,6 +36,6 @@ public class Questions {
     @OneToMany(mappedBy = "questionsId", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Reactions> reactions;
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "topic_id",nullable = false)
+    @JoinColumn(name = "topic_id", nullable = false)
     private Topics topicId;
 }

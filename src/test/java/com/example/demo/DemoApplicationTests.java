@@ -48,10 +48,10 @@ class DemoApplicationTests {
 
     @Nested
     @DisplayName("Тестирование контроллера топика")
-    public class TopicsController{
+    public class TopicsController {
         @Nested
         @DisplayName("Тестирование методов по возврату страницы со всеми топиками")
-        public class getAllTopicsPage{
+        public class getAllTopicsPage {
             @Test
             @DisplayName("Получение страницы для топиков")
             void getPageTopics() {
@@ -59,6 +59,7 @@ class DemoApplicationTests {
                 Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
                 System.out.println(response);
             }
+
             @Test
             @DisplayName("Получение страницы для топиков по названию")
             void getPageTopicsTitle() {
@@ -66,6 +67,7 @@ class DemoApplicationTests {
                 Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
                 System.out.println(response);
             }
+
             @Test
             @DisplayName("Получение страницы для топиков по не существующему названию")
             void getPageTopicsTitleNull() {
@@ -74,9 +76,10 @@ class DemoApplicationTests {
                 System.out.println(response);
             }
         }
+
         @Nested
         @DisplayName("Тестирование получения топиков по id")
-        public class getTopicsById{
+        public class getTopicsById {
             @Test
             @DisplayName("Получение топика по существующему id")
             void getTopicById() {
@@ -84,18 +87,20 @@ class DemoApplicationTests {
                 Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
                 System.out.println(response.getBody());
             }
+
             @Test
             @DisplayName("Получение топика по не существующему id")
             void getTopicByWrongId() {
                 ResponseEntity<?> response = restTemplate.getForEntity("/topics/199", String.class);
                 Assertions.assertEquals(response.getStatusCode(), HttpStatus.NOT_FOUND);
-                Assertions.assertEquals("Topic with this id is not exist",response.getBody());
+                Assertions.assertEquals("Topic with this id is not exist", response.getBody());
                 System.out.println(response.getBody());
             }
         }
+
         @Nested
         @DisplayName("Тестирование создания топика")
-        public class createTopics{
+        public class createTopics {
             @Test
             @DisplayName("Создание топика")
             void createTopic() {
@@ -103,14 +108,15 @@ class DemoApplicationTests {
                 topicsDTO.setTitle("Литература");
                 topicsDTO.setDescription("Топики на темы, связанные с книгами и чтением");
                 topicsDTO.setParentId(null);
-                ResponseEntity<?> response = restTemplate.postForEntity("/topics",topicsDTO, String.class);
+                ResponseEntity<?> response = restTemplate.postForEntity("/topics", topicsDTO, String.class);
                 Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
                 System.out.println(response.getBody());
             }
         }
+
         @Nested
         @DisplayName("Тестирование обновление топика")
-        public class updateTopics{
+        public class updateTopics {
             @Test
             @DisplayName("Обновление топика с корректными данными")
             void updateTopic() {
@@ -118,10 +124,11 @@ class DemoApplicationTests {
                 topicsDTO.setTitle("Литература updated");
                 topicsDTO.setDescription("Топики на темы, связанные с книгами и чтением updated");
                 topicsDTO.setParentId(null);
-                ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PUT,new HttpEntity<>(topicsDTO), String.class);
+                ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PUT, new HttpEntity<>(topicsDTO), String.class);
                 Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
                 System.out.println(response.getBody());
             }
+
             @Test
             @DisplayName("Поиск топика по несуществующего Id")
             void updateTopicNullId() {
@@ -129,11 +136,12 @@ class DemoApplicationTests {
                 topicsDTO.setTitle("Литература updated");
                 topicsDTO.setDescription("Топики на темы, связанные с книгами и чтением updated");
                 topicsDTO.setParentId(null);
-                ResponseEntity<?> response = restTemplate.exchange("/topics/1222", HttpMethod.PUT,new HttpEntity<>(topicsDTO), String.class);
+                ResponseEntity<?> response = restTemplate.exchange("/topics/1222", HttpMethod.PUT, new HttpEntity<>(topicsDTO), String.class);
                 Assertions.assertEquals(response.getStatusCode(), HttpStatus.NOT_FOUND);
-                Assertions.assertEquals("Topic with this id is not exist",response.getBody());
+                Assertions.assertEquals("Topic with this id is not exist", response.getBody());
                 System.out.println(response.getBody());
             }
+
             @Test
             @DisplayName("Проверка ссылки parentId на само себя")
             void updateTopicRecursionId() {
@@ -141,33 +149,36 @@ class DemoApplicationTests {
                 topicsDTO.setTitle("Литература updated");
                 topicsDTO.setDescription("Топики на темы, связанные с книгами и чтением updated");
                 topicsDTO.setParentId(1);
-                ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PUT,new HttpEntity<>(topicsDTO), String.class);
+                ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PUT, new HttpEntity<>(topicsDTO), String.class);
                 Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-                Assertions.assertEquals("Parent id cannot be equals topic id",response.getBody());
+                Assertions.assertEquals("Parent id cannot be equals topic id", response.getBody());
                 System.out.println(response.getBody());
             }
         }
+
         @Nested
         @DisplayName("Тестирование выборочное обновление топика")
-        public class patchTopics{
+        public class patchTopics {
             @Test
             @DisplayName("Обновление названия топика с корректными данными")
             void patchTopicTitle() {
                 HashMap<String, String> requestBody = new HashMap<>();
                 requestBody.put("title", "Литература updated");
-                ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PATCH,new HttpEntity<>(requestBody), String.class);
+                ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PATCH, new HttpEntity<>(requestBody), String.class);
                 Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
                 System.out.println(response.getBody());
             }
+
             @Test
             @DisplayName("Пустое тело запроса")
             void patchTopicNullBody() {
                 HashMap<String, String> requestBody = new HashMap<>();
-                ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PATCH,new HttpEntity<>(requestBody), String.class);
+                ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PATCH, new HttpEntity<>(requestBody), String.class);
                 Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-                Assertions.assertEquals("Input is empty",response.getBody());
+                Assertions.assertEquals("Input is empty", response.getBody());
                 System.out.println(response.getBody());
             }
+
             @Test
             @DisplayName("Проверка ссылки parentId на само себя")
             void patchTopicRecursionId() {
@@ -175,38 +186,41 @@ class DemoApplicationTests {
                 topicsDTO.setTitle("Литература updated");
                 topicsDTO.setDescription("Топики на темы, связанные с книгами и чтением updated");
                 topicsDTO.setParentId(1);
-                ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PATCH,new HttpEntity<>(topicsDTO), String.class);
+                ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PATCH, new HttpEntity<>(topicsDTO), String.class);
                 Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-                Assertions.assertEquals("Parent id cannot be equals topic id",response.getBody());
+                Assertions.assertEquals("Parent id cannot be equals topic id", response.getBody());
                 System.out.println(response.getBody());
             }
         }
+
         @Nested
         @DisplayName("Тестирование удаление топика")
-        public class deleteTopics{
+        public class deleteTopics {
             @Test
             @DisplayName("Удаление существующего топика")
-            void deleteTopic(){
-                ResponseEntity<?> response = restTemplate.exchange("/topics/7", HttpMethod.DELETE,new HttpEntity<>(String.class), String.class);
+            void deleteTopic() {
+                ResponseEntity<?> response = restTemplate.exchange("/topics/7", HttpMethod.DELETE, new HttpEntity<>(String.class), String.class);
                 Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
                 System.out.println(response.getBody());
             }
+
             @Test
             @DisplayName("Ошибка удаления топика с несуществующим id")
-            void deleteTopicId(){
-                ResponseEntity<?> response = restTemplate.exchange("/topics/999", HttpMethod.DELETE,new HttpEntity<>(String.class), String.class);
+            void deleteTopicId() {
+                ResponseEntity<?> response = restTemplate.exchange("/topics/999", HttpMethod.DELETE, new HttpEntity<>(String.class), String.class);
                 Assertions.assertEquals(response.getStatusCode(), HttpStatus.NOT_FOUND);
                 Assertions.assertEquals("Topic with this id does not exist", response.getBody());
                 System.out.println(response.getBody());
             }
         }
     }
+
     @Nested
     @DisplayName("Тестирование контроллера вопросов")
-    public class QuestionsController{
+    public class QuestionsController {
         @Nested
         @DisplayName("Тестирование методов по возврату страницы со всеми вопросами")
-        public class getAllQuestionsPage{
+        public class getAllQuestionsPage {
             @Test
             @DisplayName("Получение страницы для топиков")
             void getPageQuestions() {
@@ -214,6 +228,7 @@ class DemoApplicationTests {
                 Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
                 System.out.println(response);
             }
+
             @Test
             @DisplayName("Получение страницы для вопросов по тексту вопроса")
             void getPageQuestionsByText() {
@@ -221,6 +236,7 @@ class DemoApplicationTests {
                 Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
                 System.out.println(response);
             }
+
             @Test
             @DisplayName("Получение страницы для вопросов по не существующему тексту вопроса")
             void getPageQuestionsByTextNull() {
@@ -229,6 +245,7 @@ class DemoApplicationTests {
                 System.out.println(response);
             }
         }
+
         @Nested
         @DisplayName("Тестирование получения вопроса по id")
         public class getQuestionsById {
@@ -249,6 +266,7 @@ class DemoApplicationTests {
                 System.out.println(response.getBody());
             }
         }
+
         @Nested
         @DisplayName("Тестирование создания вопроса")
         public class createQuestions {
@@ -265,6 +283,7 @@ class DemoApplicationTests {
                 System.out.println(response.getBody());
             }
         }
+
         @Nested
         @DisplayName("Тестирование обновления вопроса")
         public class updateQuestions {
@@ -295,6 +314,7 @@ class DemoApplicationTests {
                 System.out.println(response.getBody());
             }
         }
+
         @Nested
         @DisplayName("Тестирование выборочное обновление вопроса")
         public class patchQuestions {
@@ -329,6 +349,7 @@ class DemoApplicationTests {
                 System.out.println(response.getBody());
             }
         }
+
         @Nested
         @DisplayName("Тестирование удаления вопроса")
         public class deleteQuestions {
@@ -350,9 +371,10 @@ class DemoApplicationTests {
             }
         }
     }
+
     @Nested
     @DisplayName("Валидация топиков")
-    public class Validation{
+    public class Validation {
         @Test
         @DisplayName("Кастомная валидация parentId на существующие id")
         void createTopicCustomValidationParentId() {
@@ -360,11 +382,12 @@ class DemoApplicationTests {
             topicsDTO.setTitle("Литература");
             topicsDTO.setDescription("Топики на темы, связанные с книгами и чтением");
             topicsDTO.setParentId(999999);
-            ResponseEntity<?> response = restTemplate.postForEntity("/topics",topicsDTO, String.class);
+            ResponseEntity<?> response = restTemplate.postForEntity("/topics", topicsDTO, String.class);
             Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-            Assertions.assertEquals("{\"parentId\":\"Invalid parent id\"}",response.getBody());
+            Assertions.assertEquals("{\"parentId\":\"Invalid parent id\"}", response.getBody());
             System.out.println(response.getBody());
         }
+
         @Test
         @DisplayName("Валидация null Title")
         void createTopicValidationNullTitle() {
@@ -372,11 +395,12 @@ class DemoApplicationTests {
             topicsDTO.setTitle(null);
             topicsDTO.setDescription("Топики на темы, связанные с книгами и чтением");
             topicsDTO.setParentId(null);
-            ResponseEntity<?> response = restTemplate.postForEntity("/topics",topicsDTO, String.class);
+            ResponseEntity<?> response = restTemplate.postForEntity("/topics", topicsDTO, String.class);
             Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-            Assertions.assertEquals("{\"title\":\"Title is blank\"}",response.getBody());
+            Assertions.assertEquals("{\"title\":\"Title is blank\"}", response.getBody());
             System.out.println(response.getBody());
         }
+
         @Test
         @DisplayName("Валидация длины Title")
         void createTopicValidationTitle() {
@@ -384,11 +408,12 @@ class DemoApplicationTests {
             topicsDTO.setTitle("Лит");
             topicsDTO.setDescription("Топики на темы, связанные с книгами и чтением");
             topicsDTO.setParentId(null);
-            ResponseEntity<?> response = restTemplate.postForEntity("/topics",topicsDTO, String.class);
+            ResponseEntity<?> response = restTemplate.postForEntity("/topics", topicsDTO, String.class);
             Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-            Assertions.assertEquals("{\"title\":\"Title size must be between 5 and 200\"}",response.getBody());
+            Assertions.assertEquals("{\"title\":\"Title size must be between 5 and 200\"}", response.getBody());
             System.out.println(response.getBody());
         }
+
         @Test
         @DisplayName("Валидация null description")
         void updateTopicValidationNullDescription() {
@@ -396,11 +421,12 @@ class DemoApplicationTests {
             topicsDTO.setTitle("Литература updated");
             topicsDTO.setDescription(null);
             topicsDTO.setParentId(null);
-            ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PUT,new HttpEntity<>(topicsDTO), String.class);
+            ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PUT, new HttpEntity<>(topicsDTO), String.class);
             Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-            Assertions.assertEquals("{\"description\":\"Description is blank\"}",response.getBody());
+            Assertions.assertEquals("{\"description\":\"Description is blank\"}", response.getBody());
             System.out.println(response.getBody());
         }
+
         @Test
         @DisplayName("Валидация description")
         void updateTopicValidationDescription() {
@@ -408,9 +434,9 @@ class DemoApplicationTests {
             topicsDTO.setTitle("Литература updated");
             topicsDTO.setDescription("Топ");
             topicsDTO.setParentId(null);
-            ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PUT,new HttpEntity<>(topicsDTO), String.class);
+            ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PUT, new HttpEntity<>(topicsDTO), String.class);
             Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-            Assertions.assertEquals("{\"description\":\"Description size must be between 5 and 200\"}",response.getBody());
+            Assertions.assertEquals("{\"description\":\"Description size must be between 5 and 200\"}", response.getBody());
             System.out.println(response.getBody());
         }
     }

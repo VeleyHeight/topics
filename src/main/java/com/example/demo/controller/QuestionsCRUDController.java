@@ -23,73 +23,76 @@ import java.util.Map;
 @RequestMapping("/questions")
 public class QuestionsCRUDController {
     private final QuestionsService questionsService;
+
     @GetMapping
     public ResponseEntity<Page<QuestionsDTO>> getAllQuestions(@RequestParam(required = false) String questions,
-                                                           @RequestParam(defaultValue = "0") int page,
-                                                           @RequestParam(defaultValue = "10") int size){
-        if (questions != null && !questions.isEmpty()){
+                                                              @RequestParam(defaultValue = "0") int page,
+                                                              @RequestParam(defaultValue = "10") int size) {
+        if (questions != null && !questions.isEmpty()) {
             return ResponseEntity.ok(questionsService.findAllByQuestionContainingIgnoreCase(questions, PageRequest.of(page, size)));
-        }
-        else {
-            return ResponseEntity.ok(questionsService.findAll(PageRequest.of(page,size)));
+        } else {
+            return ResponseEntity.ok(questionsService.findAll(PageRequest.of(page, size)));
         }
     }
+
     @GetMapping("/{id}")
-    public ResponseEntity<?> getQuestionsById(@PathVariable Integer id){
-        if (questionsService.findById(id) == null){
+    public ResponseEntity<?> getQuestionsById(@PathVariable Integer id) {
+        if (questionsService.findById(id) == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Question with this id is not exist");
-        }
-        else {
+        } else {
             return ResponseEntity.ok(questionsService.findById(id));
         }
     }
+
     @PostMapping
-    public ResponseEntity<QuestionsDTO> createQuestions(@Valid @RequestBody QuestionsDTO questionsDTO){
+    public ResponseEntity<QuestionsDTO> createQuestions(@Valid @RequestBody QuestionsDTO questionsDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(questionsService.saveQuestions(questionsDTO));
     }
+
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateQuestions(@PathVariable Integer id,@Valid @RequestBody QuestionsDTO questionsDTO){
-        if (questionsService.findById(id) == null){
+    public ResponseEntity<?> updateQuestions(@PathVariable Integer id, @Valid @RequestBody QuestionsDTO questionsDTO) {
+        if (questionsService.findById(id) == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Question with this id is not exist");
         }
         questionsDTO.setId(id);
         return ResponseEntity.ok(questionsService.updateQuestions(questionsDTO));
     }
+
     @PatchMapping("/{id}")
-    public ResponseEntity<?> patchQuestions(@PathVariable Integer id, @RequestBody HashMap<String, String> body){
-        if (questionsService.findById(id) == null){
+    public ResponseEntity<?> patchQuestions(@PathVariable Integer id, @RequestBody HashMap<String, String> body) {
+        if (questionsService.findById(id) == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Question with this id is not exist");
         }
-        if (!body.containsKey("questions") && !body.containsKey("answer") && !body.containsKey("topicId") && !body.containsKey("is_popular")){
+        if (!body.containsKey("questions") && !body.containsKey("answer") && !body.containsKey("topicId") && !body.containsKey("is_popular")) {
             return ResponseEntity.badRequest().body("Input is empty");
         }
         QuestionsDTO questions;
         try {
-            questions = questionsService.patchTopics(body,id);
-        }
-        catch (Exception e){
+            questions = questionsService.patchTopics(body, id);
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-            return ResponseEntity.ok(questions);
+        return ResponseEntity.ok(questions);
     }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteQuestions(@PathVariable Integer id){
+    public ResponseEntity<?> deleteQuestions(@PathVariable Integer id) {
         if (questionsService.findById(id) == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Question with this id does not exist");
-        }
-        else {
+        } else {
             return ResponseEntity.status(HttpStatus.OK).body(questionsService.deleteQuestions(id));
         }
     }
+
     @GetMapping("extended/{id}")
-    public ResponseEntity<?> getQuestionsByIdExtended(@PathVariable Integer id){
+    public ResponseEntity<?> getQuestionsByIdExtended(@PathVariable Integer id) {
         if (questionsService.findById(id) == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Question with this id does not exist");
-        }
-        else {
+        } else {
             return ResponseEntity.ok(questionsService.findByIdExtended(id));
         }
     }
+
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {

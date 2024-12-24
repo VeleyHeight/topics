@@ -46,17 +46,19 @@ public class questionsServiceImpl implements QuestionsService {
         });
         return dtoPage;
     }
+
     public QuestionsDTO convertToDto(Questions questions) {
-            QuestionsDTO dto = new QuestionsDTO();
-            dto.setId(questions.getId());
-            dto.setQuestion(questions.getQuestion());
-            dto.setAnswer(questions.getAnswer());
-            dto.set_popular(questions.is_popular());
-            dto.setTopicId(questions.getTopicId().getId());
-            dto.setCreated_at(questions.getCreated_at());
-            dto.setUpdated_at(questions.getUpdated_at());
-            return dto;
+        QuestionsDTO dto = new QuestionsDTO();
+        dto.setId(questions.getId());
+        dto.setQuestion(questions.getQuestion());
+        dto.setAnswer(questions.getAnswer());
+        dto.set_popular(questions.is_popular());
+        dto.setTopicId(questions.getTopicId().getId());
+        dto.setCreated_at(questions.getCreated_at());
+        dto.setUpdated_at(questions.getUpdated_at());
+        return dto;
     }
+
     @Override
     public Page<QuestionsDTO> findAll(Pageable pageable) {
         return convertToPageDto(questionsRepository.findAll(pageable));
@@ -71,12 +73,13 @@ public class questionsServiceImpl implements QuestionsService {
     public QuestionsDTO saveQuestions(QuestionsDTO questionsDTO) {
         Questions questions = new Questions();
         Optional<Topics> optionalTopic = topicsRepository.findById(questionsDTO.getTopicId());
-            questions.setQuestion(questionsDTO.getQuestion());
-            questions.set_popular(questionsDTO.is_popular());
-            questions.setAnswer(questionsDTO.getAnswer());
-            questions.setTopicId(optionalTopic.get());
-            return convertToDto(questionsRepository.save(questions));
+        questions.setQuestion(questionsDTO.getQuestion());
+        questions.set_popular(questionsDTO.is_popular());
+        questions.setAnswer(questionsDTO.getAnswer());
+        questions.setTopicId(optionalTopic.get());
+        return convertToDto(questionsRepository.save(questions));
     }
+
     @Override
     public QuestionsDTO updateQuestions(QuestionsDTO questions) {
         Optional<Questions> optionalQuestions = questionsRepository.findById(questions.getId());
@@ -91,20 +94,20 @@ public class questionsServiceImpl implements QuestionsService {
     public QuestionsDTO patchTopics(HashMap<String, String> body, Integer id) {
         Optional<Questions> questions = questionsRepository.findById(id);
         QuestionsDTO questionsDTO = convertToDto(questions.get());
-        if (body.containsKey("questions") && body.get("questions") != null){
+        if (body.containsKey("questions") && body.get("questions") != null) {
             questionsDTO.setQuestion(body.get("questions"));
         }
-        if (body.containsKey("answer") && body.get("answer") != null){
+        if (body.containsKey("answer") && body.get("answer") != null) {
             questionsDTO.setAnswer(body.get("answer"));
         }
-        if (body.containsKey("is_popular") && body.get("is_popular") != null){
+        if (body.containsKey("is_popular") && body.get("is_popular") != null) {
             questionsDTO.set_popular(Boolean.parseBoolean(body.get("is_popular")));
         }
-        if (body.containsKey("topicId") && body.get("topicId") != null){
+        if (body.containsKey("topicId") && body.get("topicId") != null) {
             questionsDTO.setTopicId(Integer.valueOf(body.get("topicId")));
         }
         Set<ConstraintViolation<QuestionsDTO>> violations = validator.validate(questionsDTO);
-        if (!violations.isEmpty()){
+        if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
         questions.get().setQuestion(questionsDTO.getQuestion());
@@ -118,10 +121,9 @@ public class questionsServiceImpl implements QuestionsService {
     @Override
     public QuestionsDTO findById(Integer id) {
         Questions questions = questionsRepository.findById(id).orElse(null);
-        if (questions == null){
+        if (questions == null) {
             return null;
-        }
-        else {
+        } else {
             return convertToDto(questions);
         }
     }
@@ -138,16 +140,15 @@ public class questionsServiceImpl implements QuestionsService {
         List<Questions> questionsList = new ArrayList<>();
         Optional<Questions> optionalQuestions = questionsRepository.findById(id);
         Topics topics;
-        if (optionalQuestions.isPresent()){
+        if (optionalQuestions.isPresent()) {
             questionsList.add(optionalQuestions.get());
             topics = topicsRepository.findAllByQuestions(questionsList);
             List<ExtendedQuestions> extendedQuestionsList = new ArrayList<>();
             List<ReactionsDTO> reactionsList = reactionsService.convertToListDto(reactionsRepository.findAllByQuestionsId(optionalQuestions.get()));
-            extendedQuestionsList.add(new ExtendedQuestions(optionalQuestions.get().getId(),optionalQuestions.get().getQuestion(),optionalQuestions.get().getAnswer(),optionalQuestions.get().is_popular(),reactionsList));
-            ExtendedTopicsDTO extendedTopicsDTO = new ExtendedTopicsDTO(topicsService.convertToDto(topics),extendedQuestionsList);
+            extendedQuestionsList.add(new ExtendedQuestions(optionalQuestions.get().getId(), optionalQuestions.get().getQuestion(), optionalQuestions.get().getAnswer(), optionalQuestions.get().is_popular(), reactionsList));
+            ExtendedTopicsDTO extendedTopicsDTO = new ExtendedTopicsDTO(topicsService.convertToDto(topics), extendedQuestionsList);
             return extendedTopicsDTO;
-        }
-        else {
+        } else {
             return null;
         }
     }

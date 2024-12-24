@@ -10,7 +10,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 @Table(name = "topics")
-public interface TopicsRepository extends JpaRepository<Topics,Integer> {
-        Page<Topics> findAllByTitleContainingIgnoreCase(String title, Pageable pageable);
-        Topics findAllByQuestions(List<Questions> questions);
+public interface TopicsRepository extends JpaRepository<Topics, Integer> {
+    Page<Topics> findAllByTitleContainingIgnoreCase(String title, Pageable pageable);
+
+    Topics findAllByQuestions(List<Questions> questions);
 }

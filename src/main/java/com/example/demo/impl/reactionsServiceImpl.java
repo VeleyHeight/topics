@@ -25,6 +25,7 @@ public class reactionsServiceImpl implements ReactionsService {
     private final ReactionsRepository reactionsRepository;
     private final QuestionsRepository questionsRepository;
     private Validator validator;
+
     public List<ReactionsDTO> convertToListDto(List<Reactions> reactionsList) {
         if (reactionsList == null) {
             return null;
@@ -35,6 +36,7 @@ public class reactionsServiceImpl implements ReactionsService {
         }
         return dto;
     }
+
     public ReactionsDTO convertToDto(Reactions reactions) {
         if (reactions == null) {
             return null;
@@ -46,6 +48,7 @@ public class reactionsServiceImpl implements ReactionsService {
         dto.setQuestionsId(reactions.getQuestionsId() != null ? reactions.getQuestionsId().getId() : null);
         return dto;
     }
+
     @Override
     public List<ReactionsDTO> findAll() {
         return convertToListDto(reactionsRepository.findAll());
@@ -79,17 +82,17 @@ public class reactionsServiceImpl implements ReactionsService {
     public ReactionsDTO patchTopics(HashMap<String, String> body, Integer id) {
         Reactions reactions = reactionsRepository.findById(id).get();
         ReactionsDTO reactionsDTO = convertToDto(reactions);
-        if (body.containsKey("user_id") && body.get("user_id") != null){
+        if (body.containsKey("user_id") && body.get("user_id") != null) {
             reactionsDTO.setUser_id(body.get("user_id"));
         }
-        if (body.containsKey("type") && body.get("type") != null){
+        if (body.containsKey("type") && body.get("type") != null) {
             reactionsDTO.setType(body.get("type"));
         }
-        if (body.containsKey("questionsId") && body.get("questionsId") != null){
+        if (body.containsKey("questionsId") && body.get("questionsId") != null) {
             reactionsDTO.setQuestionsId(Integer.valueOf(body.get("questionsId")));
         }
         Set<ConstraintViolation<ReactionsDTO>> violations = validator.validate(reactionsDTO);
-        if (!violations.isEmpty()){
+        if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
         reactions.setUser_id(UUID.fromString(reactionsDTO.getUser_id()));
@@ -102,7 +105,7 @@ public class reactionsServiceImpl implements ReactionsService {
     @Override
     public ReactionsDTO findById(Integer id) {
         Reactions reactions = reactionsRepository.findById(id).orElse(null);
-        if(reactions == null){
+        if (reactions == null) {
             return null;
         }
         return convertToDto(reactions);

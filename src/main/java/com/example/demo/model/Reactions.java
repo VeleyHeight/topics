@@ -23,7 +23,7 @@ public class Reactions {
     private String type;
     @CreationTimestamp
     private Timestamp created_at;
-    @JoinColumn(name = "questions_id",nullable = true)
+    @JoinColumn(name = "questions_id", nullable = true)
     @ManyToOne(fetch = FetchType.EAGER)
     private Questions questionsId;
 }

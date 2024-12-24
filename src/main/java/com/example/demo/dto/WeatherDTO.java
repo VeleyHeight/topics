@@ -14,6 +14,7 @@ public class WeatherDTO {
         private String description;
         private String icon;
     }
+
     @Data
     public static class Main {
         private double temp;

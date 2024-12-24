@@ -39,16 +39,16 @@ public class TopicsServiceImpl implements TopicsService {
     private QuestionsRepository questionsRepository;
     private final GetCityWeather getCityWeather;
     private final GetWeather getWeather;
+
     public Page<TopicsDTO> convertToPageDto(Page<Topics> topicsPage) {
         Page<TopicsDTO> dtoPage = topicsPage.map(topics -> {
             TopicsDTO dto = new TopicsDTO();
             dto.setId(topics.getId());
             dto.setTitle(topics.getTitle());
             dto.setDescription(topics.getDescription());
-            if(topics.getParentId() != null) {
+            if (topics.getParentId() != null) {
                 dto.setParentId(topics.getParentId().getId());
-            }
-            else {
+            } else {
                 dto.setParentId(null);
             }
             dto.setCreated_at(topics.getCreated_at());
@@ -57,21 +57,22 @@ public class TopicsServiceImpl implements TopicsService {
         });
         return dtoPage;
     }
+
     public TopicsDTO convertToDto(Topics topics) {
         TopicsDTO dto = new TopicsDTO();
         dto.setId(topics.getId());
         dto.setTitle(topics.getTitle());
         dto.setDescription(topics.getDescription());
-        if(topics.getParentId() != null) {
+        if (topics.getParentId() != null) {
             dto.setParentId(topics.getParentId().getId());
-        }
-        else {
+        } else {
             dto.setParentId(null);
         }
         dto.setCreated_at(topics.getCreated_at());
         dto.setUpdated_at(topics.getUpdated_at());
         return dto;
     }
+
     @Override
     public Page<TopicsDTO> findAll(Pageable pageable) {
         return convertToPageDto(topicsRepository.findAll(pageable));
@@ -87,12 +88,11 @@ public class TopicsServiceImpl implements TopicsService {
         Topics topics = new Topics();
         topics.setDescription(topicsDTO.getDescription());
         topics.setTitle(topicsDTO.getTitle());
-        if (topicsDTO.getParentId() == null){
+        if (topicsDTO.getParentId() == null) {
             topics.setParentId(null);
-        }
-        else {
+        } else {
             Optional<Topics> topicsOptional = topicsRepository.findById(topicsDTO.getParentId());
-                topics.setParentId(topicsOptional.get());
+            topics.setParentId(topicsOptional.get());
         }
         return convertToDto(topicsRepository.save(topics));
     }
@@ -100,10 +100,9 @@ public class TopicsServiceImpl implements TopicsService {
     @Override
     public TopicsDTO updateTopics(TopicsDTO topicsDTO) {
         Optional<Topics> topics = topicsRepository.findById(topicsDTO.getId());
-        if(topicsDTO.getParentId() != null) {
+        if (topicsDTO.getParentId() != null) {
             topics.get().setParentId(topicsRepository.findById(topicsDTO.getParentId()).get());
-        }
-        else {
+        } else {
             topics.get().setParentId(null);
         }
         topics.get().setDescription(topicsDTO.getDescription());
@@ -112,35 +111,33 @@ public class TopicsServiceImpl implements TopicsService {
     }
 
     @Override
-    public TopicsDTO patchTopics(HashMap<String, String> body,Integer id) {
+    public TopicsDTO patchTopics(HashMap<String, String> body, Integer id) {
         TopicsDTO topicsDTO = new TopicsDTO();
         Optional<Topics> topics = topicsRepository.findById(id);
         topicsDTO.setId(id);
         if (topics.get().getParentId() != null) {
             topicsDTO.setParentId(topics.get().getParentId().getId());
-        }
-        else {
+        } else {
             topicsDTO.setParentId(null);
         }
         topicsDTO.setTitle(topics.get().getTitle());
         topicsDTO.setDescription(topics.get().getDescription());
-        if (body.containsKey("title") && body.get("title") != null){
+        if (body.containsKey("title") && body.get("title") != null) {
             topicsDTO.setTitle(body.get("title"));
         }
-        if (body.containsKey("description") && body.get("description") != null){
+        if (body.containsKey("description") && body.get("description") != null) {
             topicsDTO.setDescription(body.get("description"));
         }
-        if (body.containsKey("parentId")){
+        if (body.containsKey("parentId")) {
             topicsDTO.setParentId(Integer.valueOf(body.get("parentId")));
         }
         Set<ConstraintViolation<TopicsDTO>> violations = validator.validate(topicsDTO);
-        if (!violations.isEmpty()){
+        if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
         if (topicsDTO.getParentId() != null) {
             topics.get().setParentId(topicsRepository.findById(topicsDTO.getParentId()).get());
-        }
-        else {
+        } else {
             topics.get().setParentId(null);
         }
         topics.get().setTitle(topicsDTO.getTitle());
@@ -153,15 +150,15 @@ public class TopicsServiceImpl implements TopicsService {
 
     @Override
     public TopicsDTO deleteTopics(Integer id) {
-            Topics topics = topicsRepository.findById(id).get();
-            topicsRepository.deleteById(id);
-            return convertToDto(topics);
+        Topics topics = topicsRepository.findById(id).get();
+        topicsRepository.deleteById(id);
+        return convertToDto(topics);
     }
 
     @Override
     public TopicsDTO findById(Integer id) {
         Topics topics = topicsRepository.findById(id).orElse(null);
-        if(topics == null){
+        if (topics == null) {
             return null;
         }
         return convertToDto(topics);
@@ -171,22 +168,20 @@ public class TopicsServiceImpl implements TopicsService {
     public ExtendedTopicsDTO findByIdExtended(Integer id) {
         Optional<Topics> topics = topicsRepository.findById(id);
         ExtendedTopicsDTO extendedTopicsDTO = null;
-        if (topics.isPresent()){
+        if (topics.isPresent()) {
             List<Questions> questionsList = questionsRepository.findByTopicId(topics.get());
-            if (!questionsList.isEmpty()){
+            if (!questionsList.isEmpty()) {
                 List<ExtendedQuestions> extendedQuestionsList = new ArrayList<>();
                 List<ReactionsDTO> reactionsList;
-                for(Questions questions: questionsList){
+                for (Questions questions : questionsList) {
                     reactionsList = reactionsService.convertToListDto(reactionsRepository.findAllByQuestionsId(questions));
-                    extendedQuestionsList.add(new ExtendedQuestions(questions.getId(),questions.getQuestion(),questions.getAnswer(),questions.is_popular(),reactionsList));
+                    extendedQuestionsList.add(new ExtendedQuestions(questions.getId(), questions.getQuestion(), questions.getAnswer(), questions.is_popular(), reactionsList));
                 }
-                extendedTopicsDTO = new ExtendedTopicsDTO(convertToDto(topics.get()),extendedQuestionsList);
-            }
-            else {
+                extendedTopicsDTO = new ExtendedTopicsDTO(convertToDto(topics.get()), extendedQuestionsList);
+            } else {
                 extendedTopicsDTO = new ExtendedTopicsDTO(convertToDto(topics.get()));
             }
-        }
-        else {
+        } else {
             return null;
         }
         return extendedTopicsDTO;
@@ -214,8 +209,7 @@ public class TopicsServiceImpl implements TopicsService {
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("City not found");
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error getting geo for the entered city");
         }
     }

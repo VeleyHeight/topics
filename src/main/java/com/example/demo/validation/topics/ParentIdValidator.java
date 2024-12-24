@@ -8,13 +8,14 @@ import org.springframework.stereotype.Component;
 
 @AllArgsConstructor
 @Component
-public class ParentIdValidator implements ConstraintValidator<ValidationTopicsDTO,Integer> {
+public class ParentIdValidator implements ConstraintValidator<ValidationTopicsDTO, Integer> {
     private TopicsRepository topicsRepository;
+
     @Override
     public boolean isValid(Integer id, ConstraintValidatorContext constraintValidatorContext) {
-        if (id == null){
+        if (id == null) {
             return true;
         }
-            return topicsRepository.existsById(id);
+        return topicsRepository.existsById(id);
     }
 }

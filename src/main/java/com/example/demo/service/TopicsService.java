@@ -12,12 +12,19 @@ import java.util.HashMap;
 
 public interface TopicsService {
     Page<TopicsDTO> findAll(Pageable pageable);
+
     Page<TopicsDTO> findAllByTitleContainingIgnoreCase(String title, Pageable pageable);
+
     TopicsDTO saveTopics(TopicsDTO topics);
+
     TopicsDTO deleteTopics(Integer id);
+
     TopicsDTO updateTopics(TopicsDTO topics);
-    TopicsDTO patchTopics(HashMap<String,String> map, Integer id);
+
+    TopicsDTO patchTopics(HashMap<String, String> map, Integer id);
+
     TopicsDTO findById(Integer id);
+
     ExtendedTopicsDTO findByIdExtended(Integer id);
 
     ResponseEntity<?> getWeatherInCity(String city);
