@@ -64,7 +64,7 @@ public class ReactionsCRUDController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteReactions(@RequestParam Integer id, @RequestBody Reactions reactions) {
+    public ResponseEntity<?> deleteReactions(@PathVariable Integer id) {
         if (reactionsService.findById(id) == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Reactions with this id is not exist");
         } else {

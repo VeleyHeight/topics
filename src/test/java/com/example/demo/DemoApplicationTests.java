@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import com.example.demo.dto.QuestionsDTO;
+import com.example.demo.dto.ReactionsDTO;
 import com.example.demo.dto.TopicsDTO;
 import com.example.demo.repository.TopicsRepository;
 import io.restassured.RestAssured;
@@ -31,6 +32,7 @@ import org.testcontainers.shaded.org.apache.commons.lang3.ObjectUtils;
 
 import java.awt.print.Pageable;
 import java.util.HashMap;
+import java.util.List;
 
 @Testcontainers
 @Import(TestcontainersConfiguration.class)
@@ -43,8 +45,6 @@ class DemoApplicationTests {
     Integer port;
     @Autowired
     TestRestTemplate restTemplate;
-    @Autowired
-    private TopicsRepository topicsRepository;
 
     @Nested
     @DisplayName("Тестирование контроллера топика")
@@ -252,7 +252,7 @@ class DemoApplicationTests {
             @Test
             @DisplayName("Получение вопроса по существующему id")
             void getQuestionById() {
-                ResponseEntity<?> response = restTemplate.getForEntity("/questions/1", String.class);
+                ResponseEntity<?> response = restTemplate.getForEntity("/questions/3", String.class);
                 Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
                 System.out.println(response.getBody());
             }
@@ -295,7 +295,7 @@ class DemoApplicationTests {
                 questionsDTO.setAnswer("Эверест (обновлено)");
                 questionsDTO.setTopicId(2);
                 questionsDTO.set_popular(true);
-                ResponseEntity<?> response = restTemplate.exchange("/questions/1", HttpMethod.PUT, new HttpEntity<>(questionsDTO), String.class);
+                ResponseEntity<?> response = restTemplate.exchange("/questions/4", HttpMethod.PUT, new HttpEntity<>(questionsDTO), String.class);
                 Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
                 System.out.println(response.getBody());
             }
@@ -323,7 +323,7 @@ class DemoApplicationTests {
             void patchQuestionText() {
                 HashMap<String, String> requestBody = new HashMap<>();
                 requestBody.put("questions", "Какой самый высокий вулкан в мире?");
-                ResponseEntity<?> response = restTemplate.exchange("/questions/1", HttpMethod.PATCH, new HttpEntity<>(requestBody), String.class);
+                ResponseEntity<?> response = restTemplate.exchange("/questions/5", HttpMethod.PATCH, new HttpEntity<>(requestBody), String.class);
                 Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
                 System.out.println(response.getBody());
             }
@@ -332,7 +332,7 @@ class DemoApplicationTests {
             @DisplayName("Пустое тело запроса")
             void patchQuestionNullBody() {
                 HashMap<String, String> requestBody = new HashMap<>();
-                ResponseEntity<?> response = restTemplate.exchange("/questions/1", HttpMethod.PATCH, new HttpEntity<>(requestBody), String.class);
+                ResponseEntity<?> response = restTemplate.exchange("/questions/7", HttpMethod.PATCH, new HttpEntity<>(requestBody), String.class);
                 Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
                 Assertions.assertEquals("Input is empty", response.getBody());
                 System.out.println(response.getBody());
@@ -373,8 +373,129 @@ class DemoApplicationTests {
     }
 
     @Nested
+    @DisplayName("Тестирование контроллера реакций")
+    public class ReactionsController {
+        @Nested
+        @DisplayName("Тестирование методов по возврату всех реакций")
+        public class getAllReactions {
+            @Test
+            @DisplayName("Получение списка всех реакций")
+            void getAllReaction() {
+                ResponseEntity<?> response = restTemplate.getForEntity("/reactions", List.class);
+                Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+                System.out.println(response.getBody());
+            }
+        }
+
+        @Nested
+        @DisplayName("Тестирование создания реакции")
+        public class createReactions {
+            @Test
+            @DisplayName("Создание реакции с корректными данными")
+            void createReaction() {
+                ReactionsDTO reactionsDTO = new ReactionsDTO();
+                reactionsDTO.setUser_id("a239a2cd-6e43-4fc6-b72a-073a6f3c0230");
+                reactionsDTO.setType("like");
+                reactionsDTO.setQuestionsId(8);
+                ResponseEntity<?> response = restTemplate.postForEntity("/reactions", reactionsDTO, TopicsDTO.class);
+                Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+                Assertions.assertNotNull(response.getBody());
+                System.out.println(response.getBody());
+            }
+        }
+
+        @Nested
+        @DisplayName("Тестирование обновления реакции")
+        public class updateReactions {
+            @Test
+            @DisplayName("Обновление реакции с корректными данными")
+            void updateReaction() {
+                ReactionsDTO reactionsDTO = new ReactionsDTO();
+                reactionsDTO.setUser_id("a239a2cd-6e43-4fc6-b72a-073a6f3c0230");
+                reactionsDTO.setType("dislike");
+                reactionsDTO.setQuestionsId(2);
+                ResponseEntity<?> response = restTemplate.exchange("/reactions/6", HttpMethod.PUT, new HttpEntity<>(reactionsDTO), ReactionsDTO.class);
+                Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+                Assertions.assertNotNull(response.getBody());
+                System.out.println(response.getBody());
+            }
+
+            @Test
+            @DisplayName("Обновление реакции по несуществующему Id")
+            void updateReactionNullId() {
+                ReactionsDTO reactionsDTO = new ReactionsDTO();
+                reactionsDTO.setUser_id("a239a2cd-6e43-4fc6-b72a-073a6f3c0230");
+                reactionsDTO.setType("dislike");
+                reactionsDTO.setQuestionsId(2);
+                ResponseEntity<?> response = restTemplate.exchange("/reactions/1333", HttpMethod.PUT, new HttpEntity<>(reactionsDTO), String.class);
+                Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+                Assertions.assertEquals("Reactions with this id is not exist", response.getBody());
+                System.out.println(response.getBody());
+            }
+        }
+
+        @Nested
+        @DisplayName("Тестирование частичного обновления реакции")
+        public class patchReaction {
+            @Test
+            @DisplayName("Частичное обновление типа реакции")
+            void patchReactionType() {
+                HashMap<String, String> requestBody = new HashMap<>();
+                requestBody.put("type", "dislike");
+                ResponseEntity<?> response = restTemplate.exchange("/reactions/4", HttpMethod.PATCH, new HttpEntity<>(requestBody), ReactionsDTO.class);
+                Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+                Assertions.assertNotNull(response.getBody());
+                System.out.println(response.getBody());
+            }
+
+            @Test
+            @DisplayName("Пустое тело запроса реакции")
+            void patchReactionNullBody() {
+                HashMap<String, String> requestBody = new HashMap<>();
+                ResponseEntity<?> response = restTemplate.exchange("/reactions/5", HttpMethod.PATCH, new HttpEntity<>(requestBody), String.class);
+                Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+                Assertions.assertEquals("Input is empty", response.getBody());
+                System.out.println(response.getBody());
+            }
+
+            @Test
+            @DisplayName("Попытка частичного обновления несуществующей реакции")
+            void patchNonExistingReaction() {
+                HashMap<String, String> requestBody = new HashMap<>();
+                requestBody.put("type", "like");
+                ResponseEntity<?> response = restTemplate.exchange("/reactions/999", HttpMethod.PATCH, new HttpEntity<>(requestBody), String.class);
+                Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+                Assertions.assertEquals("Reactions with this id is not exist", response.getBody());
+                System.out.println(response.getBody());
+            }
+        }
+
+        @Nested
+        @DisplayName("Тестирование удаления реакции")
+        public class deleteReactions {
+            @Test
+            @DisplayName("Удаление существующей реакции")
+            void deleteReaction() {
+                ResponseEntity<?> response = restTemplate.exchange("/reactions/1", HttpMethod.DELETE, new HttpEntity<>(String.class), String.class);
+                Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+                Assertions.assertNotNull(response.getBody());
+                System.out.println(response.getBody());
+            }
+
+            @Test
+            @DisplayName("Попытка удаления несуществующей реакции")
+            void deleteNonExistingReaction() {
+                ResponseEntity<?> response = restTemplate.exchange("/reactions/9999", HttpMethod.DELETE, new HttpEntity<>(String.class), String.class);
+                Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+                Assertions.assertEquals("Reactions with this id is not exist", response.getBody());
+                System.out.println(response.getBody());
+            }
+        }
+    }
+
+    @Nested
     @DisplayName("Валидация топиков")
-    public class Validation {
+    public class ValidationTopics {
         @Test
         @DisplayName("Кастомная валидация parentId на существующие id")
         void createTopicCustomValidationParentId() {
@@ -389,10 +510,10 @@ class DemoApplicationTests {
         }
 
         @Test
-        @DisplayName("Валидация null Title")
+        @DisplayName("Валидация blank Title")
         void createTopicValidationNullTitle() {
             TopicsDTO topicsDTO = new TopicsDTO();
-            topicsDTO.setTitle(null);
+            topicsDTO.setTitle("        ");
             topicsDTO.setDescription("Топики на темы, связанные с книгами и чтением");
             topicsDTO.setParentId(null);
             ResponseEntity<?> response = restTemplate.postForEntity("/topics", topicsDTO, String.class);
@@ -419,16 +540,16 @@ class DemoApplicationTests {
         void updateTopicValidationNullDescription() {
             TopicsDTO topicsDTO = new TopicsDTO();
             topicsDTO.setTitle("Литература updated");
-            topicsDTO.setDescription(null);
+            topicsDTO.setDescription("     ");
             topicsDTO.setParentId(null);
-            ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PUT, new HttpEntity<>(topicsDTO), String.class);
+            ResponseEntity<?> response = restTemplate.exchange("/topics/5", HttpMethod.PUT, new HttpEntity<>(topicsDTO), String.class);
             Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
             Assertions.assertEquals("{\"description\":\"Description is blank\"}", response.getBody());
             System.out.println(response.getBody());
         }
 
         @Test
-        @DisplayName("Валидация description")
+        @DisplayName("Валидация size description")
         void updateTopicValidationDescription() {
             TopicsDTO topicsDTO = new TopicsDTO();
             topicsDTO.setTitle("Литература updated");
@@ -437,6 +558,109 @@ class DemoApplicationTests {
             ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PUT, new HttpEntity<>(topicsDTO), String.class);
             Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
             Assertions.assertEquals("{\"description\":\"Description size must be between 5 and 200\"}", response.getBody());
+            System.out.println(response.getBody());
+        }
+    }
+
+    @Nested
+    @DisplayName("Валидация вопросов")
+    public class ValidationQuestions {
+        @Test
+        @DisplayName("Кастомная валидация topicId на существующие id")
+        void createQuestionsValidationTopicId() {
+            QuestionsDTO questionsDTO = new QuestionsDTO();
+            questionsDTO.setQuestion("Какой самый высокий горный пик в мире?");
+            questionsDTO.setAnswer("Эверест");
+            questionsDTO.setTopicId(0);
+            questionsDTO.set_popular(false);
+            ResponseEntity<?> response = restTemplate.postForEntity("/questions", questionsDTO, String.class);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            Assertions.assertEquals("{\"topicId\":\"Invalid topic id\"}", response.getBody());
+            System.out.println(response.getBody());
+        }
+
+        @Test
+        @DisplayName("Валидация questions на длину от 5 до 1000")
+        void createQuestionsValidationQuiestions() {
+            QuestionsDTO questionsDTO = new QuestionsDTO();
+            questionsDTO.setQuestion("Как");
+            questionsDTO.setAnswer("Эверест");
+            questionsDTO.setTopicId(1);
+            questionsDTO.set_popular(false);
+            ResponseEntity<?> response = restTemplate.postForEntity("/questions", questionsDTO, String.class);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            Assertions.assertEquals("{\"question\":\"Question size must be between 5 and 1000\"}", response.getBody());
+            System.out.println(response.getBody());
+        }
+
+        @Test
+        @DisplayName("Валидация questions на пустой вопрос")
+        void createQuestionsValidationBlankQuiestions() {
+            QuestionsDTO questionsDTO = new QuestionsDTO();
+            questionsDTO.setAnswer("Эверест");
+            questionsDTO.setQuestion("                   ");
+            questionsDTO.setTopicId(1);
+            questionsDTO.set_popular(false);
+            ResponseEntity<?> response = restTemplate.postForEntity("/questions", questionsDTO, String.class);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            Assertions.assertEquals("{\"question\":\"Question is blank\"}", response.getBody());
+            System.out.println(response.getBody());
+        }
+
+        @Test
+        @DisplayName("Валидация answer на размер ответа")
+        void createQuestionsValidationSizeAnswer() {
+            QuestionsDTO questionsDTO = new QuestionsDTO();
+            questionsDTO.setAnswer("Эве");
+            questionsDTO.setQuestion("Какой самый высокий горный пик в мире?");
+            questionsDTO.setTopicId(1);
+            questionsDTO.set_popular(false);
+            ResponseEntity<?> response = restTemplate.postForEntity("/questions", questionsDTO, String.class);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            Assertions.assertEquals("{\"answer\":\"Answer size must be between 5 and 10000\"}", response.getBody());
+            System.out.println(response.getBody());
+        }
+    }
+
+    @Nested
+    @DisplayName("Валидация реакции")
+    public class ValidationReactions {
+        @Test
+        @DisplayName("Кастомная валидация questionsId на существующие id")
+        void createReactionValidationQuestionsId() {
+            ReactionsDTO reactionsDTO = new ReactionsDTO();
+            reactionsDTO.setUser_id("a239a2cd-6e43-4fc6-b72a-073a6f3c0230");
+            reactionsDTO.setType("like");
+            reactionsDTO.setQuestionsId(0);
+            ResponseEntity<?> response = restTemplate.postForEntity("/reactions", reactionsDTO, String.class);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            Assertions.assertEquals("{\"questionsId\":\"Invalid question id\"}", response.getBody());
+            System.out.println(response.getBody());
+        }
+
+        @Test
+        @DisplayName("Валидация userId на пустой запрос")
+        void createReactionValidationBlankId() {
+            ReactionsDTO reactionsDTO = new ReactionsDTO();
+            reactionsDTO.setUser_id("               ");
+            reactionsDTO.setType("like");
+            reactionsDTO.setQuestionsId(1);
+            ResponseEntity<?> response = restTemplate.postForEntity("/reactions", reactionsDTO, String.class);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            Assertions.assertEquals("{\"user_id\":\"User is blank\"}", response.getBody());
+            System.out.println(response.getBody());
+        }
+
+        @Test
+        @DisplayName("Валидация type на размер реакции")
+        void createReactionValidation() {
+            ReactionsDTO reactionsDTO = new ReactionsDTO();
+            reactionsDTO.setUser_id("a239a2cd-6e43-4fc6-b72a-073a6f3c0230");
+            reactionsDTO.setType("п");
+            reactionsDTO.setQuestionsId(1);
+            ResponseEntity<?> response = restTemplate.postForEntity("/reactions", reactionsDTO, String.class);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            Assertions.assertEquals("{\"type\":\"Type size must be between 2 and 50\"}", response.getBody());
             System.out.println(response.getBody());
         }
     }
