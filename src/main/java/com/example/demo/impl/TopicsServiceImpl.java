@@ -2,6 +2,8 @@ package com.example.demo.impl;
 
 import com.example.demo.client.GetCityWeather;
 import com.example.demo.client.GetWeather;
+import com.example.demo.converter.ReactionsConverter;
+import com.example.demo.converter.TopicsConverter;
 import com.example.demo.dto.ReactionsDTO;
 import com.example.demo.dto.TopicsDTO;
 import com.example.demo.dto.WeatherCityDTO;
@@ -9,12 +11,10 @@ import com.example.demo.dto.WeatherDTO;
 import com.example.demo.dto.extended.ExtendedTopicsDTO;
 import com.example.demo.dto.extended.ExtendedQuestions;
 import com.example.demo.model.Questions;
-import com.example.demo.model.Reactions;
 import com.example.demo.model.Topics;
 import com.example.demo.repository.QuestionsRepository;
 import com.example.demo.repository.ReactionsRepository;
 import com.example.demo.repository.TopicsRepository;
-import com.example.demo.service.ReactionsService;
 import com.example.demo.service.TopicsService;
 import jakarta.validation.*;
 import lombok.AllArgsConstructor;
@@ -33,54 +33,22 @@ import java.util.*;
 public class TopicsServiceImpl implements TopicsService {
     private static final Logger log = LoggerFactory.getLogger(TopicsServiceImpl.class);
     private final ReactionsRepository reactionsRepository;
-    private final reactionsServiceImpl reactionsService;
+    private final ReactionsConverter reactionsConverter;
     private Validator validator;
     private TopicsRepository topicsRepository;
     private QuestionsRepository questionsRepository;
     private final GetCityWeather getCityWeather;
     private final GetWeather getWeather;
-
-    public Page<TopicsDTO> convertToPageDto(Page<Topics> topicsPage) {
-        Page<TopicsDTO> dtoPage = topicsPage.map(topics -> {
-            TopicsDTO dto = new TopicsDTO();
-            dto.setId(topics.getId());
-            dto.setTitle(topics.getTitle());
-            dto.setDescription(topics.getDescription());
-            if (topics.getParentId() != null) {
-                dto.setParentId(topics.getParentId().getId());
-            } else {
-                dto.setParentId(null);
-            }
-            dto.setCreated_at(topics.getCreated_at());
-            dto.setUpdated_at(topics.getUpdated_at());
-            return dto;
-        });
-        return dtoPage;
-    }
-
-    public TopicsDTO convertToDto(Topics topics) {
-        TopicsDTO dto = new TopicsDTO();
-        dto.setId(topics.getId());
-        dto.setTitle(topics.getTitle());
-        dto.setDescription(topics.getDescription());
-        if (topics.getParentId() != null) {
-            dto.setParentId(topics.getParentId().getId());
-        } else {
-            dto.setParentId(null);
-        }
-        dto.setCreated_at(topics.getCreated_at());
-        dto.setUpdated_at(topics.getUpdated_at());
-        return dto;
-    }
+    private TopicsConverter topicsConverter;
 
     @Override
     public Page<TopicsDTO> findAll(Pageable pageable) {
-        return convertToPageDto(topicsRepository.findAll(pageable));
+        return topicsConverter.convertToDTOPage(topicsRepository.findAll(pageable));
     }
 
     @Override
     public Page<TopicsDTO> findAllByTitleContainingIgnoreCase(String title, Pageable pageable) {
-        return convertToPageDto(topicsRepository.findAllByTitleContainingIgnoreCase(title, pageable));
+        return topicsConverter.convertToDTOPage(topicsRepository.findAllByTitleContainingIgnoreCase(title, pageable));
     }
 
     @Override
@@ -94,7 +62,7 @@ public class TopicsServiceImpl implements TopicsService {
             Optional<Topics> topicsOptional = topicsRepository.findById(topicsDTO.getParentId());
             topics.setParentId(topicsOptional.get());
         }
-        return convertToDto(topicsRepository.save(topics));
+        return topicsConverter.convertToDTO(topicsRepository.save(topics));
     }
 
     @Override
@@ -107,7 +75,7 @@ public class TopicsServiceImpl implements TopicsService {
         }
         topics.get().setDescription(topicsDTO.getDescription());
         topics.get().setTitle(topicsDTO.getTitle());
-        return convertToDto(topicsRepository.save(topics.get()));
+        return topicsConverter.convertToDTO(topicsRepository.save(topics.get()));
     }
 
     @Override
@@ -152,7 +120,7 @@ public class TopicsServiceImpl implements TopicsService {
     public TopicsDTO deleteTopics(Integer id) {
         Topics topics = topicsRepository.findById(id).get();
         topicsRepository.deleteById(id);
-        return convertToDto(topics);
+        return topicsConverter.convertToDTO(topics);
     }
 
     @Override
@@ -161,7 +129,7 @@ public class TopicsServiceImpl implements TopicsService {
         if (topics == null) {
             return null;
         }
-        return convertToDto(topics);
+        return topicsConverter.convertToDTO(topics);
     }
 
     @Override
@@ -174,12 +142,12 @@ public class TopicsServiceImpl implements TopicsService {
                 List<ExtendedQuestions> extendedQuestionsList = new ArrayList<>();
                 List<ReactionsDTO> reactionsList;
                 for (Questions questions : questionsList) {
-                    reactionsList = reactionsService.convertToListDto(reactionsRepository.findAllByQuestionsId(questions));
+                    reactionsList = reactionsConverter.convertToListDTO(reactionsRepository.findAllByQuestionsId(questions));
                     extendedQuestionsList.add(new ExtendedQuestions(questions.getId(), questions.getQuestion(), questions.getAnswer(), questions.is_popular(), reactionsList));
                 }
-                extendedTopicsDTO = new ExtendedTopicsDTO(convertToDto(topics.get()), extendedQuestionsList);
+                extendedTopicsDTO = new ExtendedTopicsDTO(topicsConverter.convertToDTO(topics.get()), extendedQuestionsList);
             } else {
-                extendedTopicsDTO = new ExtendedTopicsDTO(convertToDto(topics.get()));
+                extendedTopicsDTO = new ExtendedTopicsDTO(topicsConverter.convertToDTO(topics.get()));
             }
         } else {
             return null;

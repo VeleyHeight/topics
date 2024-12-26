@@ -3,6 +3,7 @@ package com.example.demo;
 import com.example.demo.dto.QuestionsDTO;
 import com.example.demo.dto.ReactionsDTO;
 import com.example.demo.dto.TopicsDTO;
+import com.example.demo.dto.extended.ExtendedTopicsDTO;
 import com.example.demo.repository.TopicsRepository;
 import io.restassured.RestAssured;
 import org.hamcrest.Matchers;
@@ -99,6 +100,27 @@ class DemoApplicationTests {
         }
 
         @Nested
+        @DisplayName("Тестирование расширенного получения топиков по id ")
+        public class getTopicsByIdExtended {
+            @Test
+            @DisplayName("Получение топика по существующему id")
+            void getTopicByIdExtended() {
+                ResponseEntity<?> response = restTemplate.getForEntity("/topics/extended/2", String.class);
+                Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+                System.out.println(response.getBody());
+            }
+
+            @Test
+            @DisplayName("Расширенное получение топика по не существующему id")
+            void getTopicByWrongIdExtended() {
+                ResponseEntity<?> response = restTemplate.getForEntity("/topics/extended/199", String.class);
+                Assertions.assertEquals(response.getStatusCode(), HttpStatus.NOT_FOUND);
+                Assertions.assertEquals("Topic with this id does not exist", response.getBody());
+                System.out.println(response.getBody());
+            }
+        }
+
+        @Nested
         @DisplayName("Тестирование создания топика")
         public class createTopics {
             @Test
@@ -107,7 +129,7 @@ class DemoApplicationTests {
                 TopicsDTO topicsDTO = new TopicsDTO();
                 topicsDTO.setTitle("Литература");
                 topicsDTO.setDescription("Топики на темы, связанные с книгами и чтением");
-                topicsDTO.setParentId(null);
+                topicsDTO.setParentId(9);
                 ResponseEntity<?> response = restTemplate.postForEntity("/topics", topicsDTO, String.class);
                 Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
                 System.out.println(response.getBody());
@@ -268,6 +290,27 @@ class DemoApplicationTests {
         }
 
         @Nested
+        @DisplayName("Тестирование расширенного получения топиков по id вопроса")
+        public class getTopicsByIdExtended {
+            @Test
+            @DisplayName("Получение топика по существующему id вопроса")
+            void getTopicByIdExtended() {
+                ResponseEntity<?> response = restTemplate.getForEntity("/questions/extended/2", String.class);
+                Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+                System.out.println(response.getBody());
+            }
+
+            @Test
+            @DisplayName("Расширенное получение топика по не существующему id вопроса")
+            void getTopicByWrongIdExtended() {
+                ResponseEntity<?> response = restTemplate.getForEntity("/questions/extended/199", String.class);
+                Assertions.assertEquals(response.getStatusCode(), HttpStatus.NOT_FOUND);
+                Assertions.assertEquals("Question with this id does not exist", response.getBody());
+                System.out.println(response.getBody());
+            }
+        }
+
+        @Nested
         @DisplayName("Тестирование создания вопроса")
         public class createQuestions {
             @Test
@@ -397,7 +440,7 @@ class DemoApplicationTests {
                 reactionsDTO.setUser_id("a239a2cd-6e43-4fc6-b72a-073a6f3c0230");
                 reactionsDTO.setType("like");
                 reactionsDTO.setQuestionsId(8);
-                ResponseEntity<?> response = restTemplate.postForEntity("/reactions", reactionsDTO, TopicsDTO.class);
+                ResponseEntity<?> response = restTemplate.postForEntity("/reactions", reactionsDTO, ReactionsDTO.class);
                 Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
                 Assertions.assertNotNull(response.getBody());
                 System.out.println(response.getBody());

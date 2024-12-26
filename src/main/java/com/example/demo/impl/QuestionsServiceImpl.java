@@ -1,12 +1,13 @@
 package com.example.demo.impl;
 
+import com.example.demo.converter.QuestionsConverter;
+import com.example.demo.converter.ReactionsConverter;
+import com.example.demo.converter.TopicsConverter;
 import com.example.demo.dto.ReactionsDTO;
-import com.example.demo.dto.TopicsDTO;
 import com.example.demo.dto.extended.ExtendedQuestions;
 import com.example.demo.dto.extended.ExtendedTopicsDTO;
 import com.example.demo.dto.QuestionsDTO;
 import com.example.demo.model.Questions;
-import com.example.demo.model.Reactions;
 import com.example.demo.model.Topics;
 import com.example.demo.repository.QuestionsRepository;
 import com.example.demo.repository.ReactionsRepository;
@@ -24,49 +25,23 @@ import java.util.*;
 
 @Service
 @AllArgsConstructor
-public class questionsServiceImpl implements QuestionsService {
+public class QuestionsServiceImpl implements QuestionsService {
+    private final ReactionsConverter reactionsConverter;
     private QuestionsRepository questionsRepository;
     private TopicsRepository topicsRepository;
     private ReactionsRepository reactionsRepository;
-    private reactionsServiceImpl reactionsService;
+    private TopicsConverter topicsConverter;
+    private QuestionsConverter questionsConverter;
     private Validator validator;
-    private TopicsServiceImpl topicsService;
-
-    public Page<QuestionsDTO> convertToPageDto(Page<Questions> questionsPage) {
-        Page<QuestionsDTO> dtoPage = questionsPage.map(question -> {
-            QuestionsDTO dto = new QuestionsDTO();
-            dto.setId(question.getId());
-            dto.setQuestion(question.getQuestion());
-            dto.setAnswer(question.getAnswer());
-            dto.set_popular(question.is_popular());
-            dto.setTopicId(question.getTopicId().getId());
-            dto.setCreated_at(question.getCreated_at());
-            dto.setUpdated_at(question.getUpdated_at());
-            return dto;
-        });
-        return dtoPage;
-    }
-
-    public QuestionsDTO convertToDto(Questions questions) {
-        QuestionsDTO dto = new QuestionsDTO();
-        dto.setId(questions.getId());
-        dto.setQuestion(questions.getQuestion());
-        dto.setAnswer(questions.getAnswer());
-        dto.set_popular(questions.is_popular());
-        dto.setTopicId(questions.getTopicId().getId());
-        dto.setCreated_at(questions.getCreated_at());
-        dto.setUpdated_at(questions.getUpdated_at());
-        return dto;
-    }
 
     @Override
     public Page<QuestionsDTO> findAll(Pageable pageable) {
-        return convertToPageDto(questionsRepository.findAll(pageable));
+        return questionsConverter.convertToDTOPage(questionsRepository.findAll(pageable));
     }
 
     @Override
     public Page<QuestionsDTO> findAllByQuestionContainingIgnoreCase(String title, Pageable pageable) {
-        return convertToPageDto(questionsRepository.findAllByQuestionContainingIgnoreCase(title, pageable));
+        return questionsConverter.convertToDTOPage(questionsRepository.findAllByQuestionContainingIgnoreCase(title, pageable));
     }
 
     @Override
@@ -77,7 +52,7 @@ public class questionsServiceImpl implements QuestionsService {
         questions.set_popular(questionsDTO.is_popular());
         questions.setAnswer(questionsDTO.getAnswer());
         questions.setTopicId(optionalTopic.get());
-        return convertToDto(questionsRepository.save(questions));
+        return questionsConverter.convertToDTO(questionsRepository.save(questions));
     }
 
     @Override
@@ -87,13 +62,13 @@ public class questionsServiceImpl implements QuestionsService {
         optionalQuestions.get().setAnswer(questions.getAnswer());
         optionalQuestions.get().set_popular(questions.is_popular());
         optionalQuestions.get().setTopicId(topicsRepository.findById(questions.getTopicId()).get());
-        return convertToDto(questionsRepository.save(optionalQuestions.get()));
+        return questionsConverter.convertToDTO(questionsRepository.save(optionalQuestions.get()));
     }
 
     @Override
     public QuestionsDTO patchTopics(HashMap<String, String> body, Integer id) {
         Optional<Questions> questions = questionsRepository.findById(id);
-        QuestionsDTO questionsDTO = convertToDto(questions.get());
+        QuestionsDTO questionsDTO = questionsConverter.convertToDTO(questions.get());
         if (body.containsKey("questions") && body.get("questions") != null) {
             questionsDTO.setQuestion(body.get("questions"));
         }
@@ -124,7 +99,7 @@ public class questionsServiceImpl implements QuestionsService {
         if (questions == null) {
             return null;
         } else {
-            return convertToDto(questions);
+            return questionsConverter.convertToDTO(questions);
         }
     }
 
@@ -132,7 +107,7 @@ public class questionsServiceImpl implements QuestionsService {
     public QuestionsDTO deleteQuestions(Integer id) {
         Questions questions = questionsRepository.findById(id).get();
         questionsRepository.deleteById(id);
-        return convertToDto(questions);
+        return questionsConverter.convertToDTO(questions);
     }
 
     @Override
@@ -144,9 +119,9 @@ public class questionsServiceImpl implements QuestionsService {
             questionsList.add(optionalQuestions.get());
             topics = topicsRepository.findAllByQuestions(questionsList);
             List<ExtendedQuestions> extendedQuestionsList = new ArrayList<>();
-            List<ReactionsDTO> reactionsList = reactionsService.convertToListDto(reactionsRepository.findAllByQuestionsId(optionalQuestions.get()));
+            List<ReactionsDTO> reactionsList = reactionsConverter.convertToListDTO(reactionsRepository.findAllByQuestionsId(optionalQuestions.get()));
             extendedQuestionsList.add(new ExtendedQuestions(optionalQuestions.get().getId(), optionalQuestions.get().getQuestion(), optionalQuestions.get().getAnswer(), optionalQuestions.get().is_popular(), reactionsList));
-            ExtendedTopicsDTO extendedTopicsDTO = new ExtendedTopicsDTO(topicsService.convertToDto(topics), extendedQuestionsList);
+            ExtendedTopicsDTO extendedTopicsDTO = new ExtendedTopicsDTO(topicsConverter.convertToDTO(topics), extendedQuestionsList);
             return extendedTopicsDTO;
         } else {
             return null;
