@@ -2,6 +2,7 @@
 
 volumes:
   pg_topics:
+  prometheus_data:
 
 services:
   topics_db:
@@ -16,3 +17,23 @@ services:
       - pg_topics:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - prometheus_data:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+  app:
+    restart: always
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - topics_db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://topics_db:5432/topics
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=1234

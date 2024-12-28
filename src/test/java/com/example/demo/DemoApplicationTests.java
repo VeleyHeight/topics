@@ -295,7 +295,7 @@ class DemoApplicationTests {
             @Test
             @DisplayName("Получение топика по существующему id вопроса")
             void getTopicByIdExtended() {
-                ResponseEntity<?> response = restTemplate.getForEntity("/questions/extended/2", String.class);
+                ResponseEntity<?> response = restTemplate.getForEntity("/questions/extended/6", String.class);
                 Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
                 System.out.println(response.getBody());
             }

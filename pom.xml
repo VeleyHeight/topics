@@ -153,6 +153,7 @@
 				<configuration>
 					<argLine>
 						-javaagent:${settings.localRepository}/net/bytebuddy/byte-buddy-agent/${byte-buddy.version}/byte-buddy-agent-${byte-buddy.version}.jar
+						-Dfile.encoding=UTF-8
 					</argLine>
 					<properties>
 						<property>
