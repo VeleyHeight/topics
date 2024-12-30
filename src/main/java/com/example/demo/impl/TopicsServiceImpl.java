@@ -18,8 +18,10 @@ import com.example.demo.repository.TopicsRepository;
 import com.example.demo.service.TopicsService;
 import jakarta.validation.*;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,17 +31,19 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TopicsServiceImpl implements TopicsService {
     private static final Logger log = LoggerFactory.getLogger(TopicsServiceImpl.class);
     private final ReactionsRepository reactionsRepository;
     private final ReactionsConverter reactionsConverter;
-    private Validator validator;
-    private TopicsRepository topicsRepository;
-    private QuestionsRepository questionsRepository;
+    private final Validator validator;
+    private final TopicsRepository topicsRepository;
+    private final QuestionsRepository questionsRepository;
     private final GetCityWeather getCityWeather;
     private final GetWeather getWeather;
-    private TopicsConverter topicsConverter;
+    private final TopicsConverter topicsConverter;
+    @Value("${openfeign.api.key}")
+    private String apiKey;
 
     @Override
     public Page<TopicsDTO> findAll(Pageable pageable) {
@@ -158,10 +162,10 @@ public class TopicsServiceImpl implements TopicsService {
     @Override
     public ResponseEntity<?> getWeatherInCity(String city) {
         try {
-            List<WeatherCityDTO> weatherCityDTOList = getCityWeather.getGeoByCity(city, 1, GetCityWeather.api);
+            List<WeatherCityDTO> weatherCityDTOList = getCityWeather.getGeoByCity(city, 1, apiKey);
             if (weatherCityDTOList != null && !weatherCityDTOList.isEmpty()) {
                 try {
-                    WeatherDTO weatherDTO = getWeather.getWeather(weatherCityDTOList.get(0).getLat(), weatherCityDTOList.get(0).getLon(), GetWeather.api, "metric");
+                    WeatherDTO weatherDTO = getWeather.getWeather(weatherCityDTOList.get(0).getLat(), weatherCityDTOList.get(0).getLon(), apiKey, "metric");
                     if (weatherDTO != null) {
                         HashMap<String, Object> response = new HashMap<>();
                         response.put("Weather", weatherDTO.getWeather()[0].getMain());
