@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+//todo Исправь заменчания в topic service, увидишь аналогичные ошибки имплементации сервисов для question, reaction
 @Service
 @AllArgsConstructor
 public class ReactionsServiceImpl implements ReactionsService {

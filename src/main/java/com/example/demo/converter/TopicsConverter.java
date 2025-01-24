@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
+//todo вместо конвертеров используй мапперы мапстракта
 @AllArgsConstructor
 @Component
 public class TopicsConverter {

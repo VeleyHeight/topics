@@ -2,6 +2,7 @@ package com.example.demo.dto;
 
 import lombok.Data;
 
+//todo @Data избыточна, используй отдельные аннотации, измени классы на record и добавь валидацию полей при создании dto!!!
 @Data
 public class WeatherDTO {
     private Weather[] weather;

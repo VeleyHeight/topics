@@ -21,6 +21,8 @@ public interface TopicsService {
 
     TopicsDTO updateTopics(TopicsDTO topics);
 
+    //todo
+    // Нужно использовать вместо HashMap - Map, смотри принципы SOLID!!
     TopicsDTO patchTopics(HashMap<String, String> map, Integer id);
 
     TopicsDTO findById(Integer id);
