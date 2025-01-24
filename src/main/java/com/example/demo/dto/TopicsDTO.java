@@ -12,6 +12,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
+//todo @Data избыточна, используй отдельные аннотации, измени классы на record и добавь валидацию полей при создании dto!!!
 //@RecursionValidation
 //@Validated
 @Data
@@ -20,6 +21,7 @@ public class TopicsDTO {
 
     @Transient
     private Integer id;
+    //todo для типа String всегда используй исключительно @NotBlank тк нулловый стринг это "" пустая строка
     @NotNull(message = "Title is required")
     @NotBlank(message = "Title is blank")
     @Size(min = 5, max = 200, message = "Title size must be between 5 and 200")

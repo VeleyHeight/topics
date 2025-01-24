@@ -31,10 +31,12 @@ public class Questions {
     private Timestamp created_at;
     @UpdateTimestamp
     private Timestamp updated_at;
+    //todo !!! коллекции не используйются с типом EAGER тк может быть огромное количество записей в ней
     @JsonIgnore
     @OnDelete(action = OnDeleteAction.CASCADE)
     @OneToMany(mappedBy = "questionsId", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Reactions> reactions;
+    //todo LAZY
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "topic_id", nullable = false)
     private Topics topicId;

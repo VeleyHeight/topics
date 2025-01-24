@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
+//todo необязательная аннотация
 @Table(name = "topics")
 public interface TopicsRepository extends JpaRepository<Topics, Integer> {
     Page<Topics> findAllByTitleContainingIgnoreCase(String title, Pageable pageable);

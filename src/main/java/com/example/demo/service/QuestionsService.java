@@ -20,6 +20,7 @@ public interface QuestionsService {
 
     QuestionsDTO updateQuestions(QuestionsDTO questions);
 
+    //todo Map/SOLID!!!!
     QuestionsDTO patchTopics(HashMap<String, String> map, Integer id);
 
     QuestionsDTO findById(Integer id);

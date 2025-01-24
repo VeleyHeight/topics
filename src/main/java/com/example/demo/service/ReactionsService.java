@@ -16,6 +16,7 @@ public interface ReactionsService {
 
     ReactionsDTO updateReactions(ReactionsDTO reactions);
 
+    //todo Map вместо HashMap
     ReactionsDTO patchTopics(HashMap<String, String> map, Integer id);
 
     ReactionsDTO findById(Integer id);

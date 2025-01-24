@@ -38,6 +38,7 @@ public class TopicsCRUDController {
         return topicsService.getWeatherInCity(city);
     }
 
+    //todo Вместо отдельных полей испольуй @ParameterObject @ModelAttribute TopicFilter filter типа record и создавай там спецификации для проверки
     @GetMapping
     public ResponseEntity<Page<TopicsDTO>> getAllTopics(@RequestParam(required = false) String title,
                                                         @RequestParam(defaultValue = "0") int page,
@@ -112,6 +113,7 @@ public class TopicsCRUDController {
         }
     }
 
+    //todo создай отдельный класс GlobalExceptionHandler для обработки в нем всех исключений приложения!!!
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {

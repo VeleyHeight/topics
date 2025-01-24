@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+//todo вместо конвертеров используй мапперы мапстракта
 @Component
 @AllArgsConstructor
 public class ReactionsConverter {

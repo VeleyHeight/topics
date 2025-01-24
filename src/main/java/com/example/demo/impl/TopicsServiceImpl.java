@@ -30,9 +30,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+//todo @Slf4j для логгера вместо статик поля
 @Service
 @RequiredArgsConstructor
 public class TopicsServiceImpl implements TopicsService {
+    //todo !!!оставить только поля топиков, остальное убрать, конвертер замени на Mapper, используй mapstruct
     private static final Logger log = LoggerFactory.getLogger(TopicsServiceImpl.class);
     private final ReactionsRepository reactionsRepository;
     private final ReactionsConverter reactionsConverter;
@@ -42,14 +44,17 @@ public class TopicsServiceImpl implements TopicsService {
     private final GetCityWeather getCityWeather;
     private final GetWeather getWeather;
     private final TopicsConverter topicsConverter;
+    //todo Вынеси @Value в рекорд класс пропертей и сюда инжекти их
     @Value("${openfeign.api.key}")
     private String apiKey;
 
+    //todo дефолтный Page нестабилен, нужно либо писать свою реализацию, либо после 3.3+ spring исползуй PagedModel <T>
     @Override
     public Page<TopicsDTO> findAll(Pageable pageable) {
         return topicsConverter.convertToDTOPage(topicsRepository.findAll(pageable));
     }
 
+    //todo Вместо поля title используй создание спецификации из фильтра в зависимости от значения полей, проверь граничные значения пагинирования, а так-же отрицательные значения и значение 0 в LIMIT
     @Override
     public Page<TopicsDTO> findAllByTitleContainingIgnoreCase(String title, Pageable pageable) {
         return topicsConverter.convertToDTOPage(topicsRepository.findAllByTitleContainingIgnoreCase(title, pageable));
@@ -57,6 +62,7 @@ public class TopicsServiceImpl implements TopicsService {
 
     @Override
     public TopicsDTO saveTopics(TopicsDTO topicsDTO) {
+        //todo используй builder и mapper создания сущности вместо new и сеттинга полей
         Topics topics = new Topics();
         topics.setDescription(topicsDTO.getDescription());
         topics.setTitle(topicsDTO.getTitle());
@@ -64,6 +70,7 @@ public class TopicsServiceImpl implements TopicsService {
             topics.setParentId(null);
         } else {
             Optional<Topics> topicsOptional = topicsRepository.findById(topicsDTO.getParentId());
+            //todo добавь проверку наличия значения в Optional обертке перед гетом, используй стрим Optional.ofNullable().olElseThrow(() -> throw new...)
             topics.setParentId(topicsOptional.get());
         }
         return topicsConverter.convertToDTO(topicsRepository.save(topics));
@@ -71,6 +78,7 @@ public class TopicsServiceImpl implements TopicsService {
 
     @Override
     public TopicsDTO updateTopics(TopicsDTO topicsDTO) {
+        //todo отсутствуют проверки на наличие значения в Optional!!!
         Optional<Topics> topics = topicsRepository.findById(topicsDTO.getId());
         if (topicsDTO.getParentId() != null) {
             topics.get().setParentId(topicsRepository.findById(topicsDTO.getParentId()).get());
@@ -82,6 +90,7 @@ public class TopicsServiceImpl implements TopicsService {
         return topicsConverter.convertToDTO(topicsRepository.save(topics.get()));
     }
 
+    //todo Проверки в Optional, MAP/SOLID, вынеси проверки is/in полей в filter и в нем создавай спецификаци для запроса, repository экстенди от specification executor
     @Override
     public TopicsDTO patchTopics(HashMap<String, String> body, Integer id) {
         TopicsDTO topicsDTO = new TopicsDTO();
@@ -122,6 +131,7 @@ public class TopicsServiceImpl implements TopicsService {
 
     @Override
     public TopicsDTO deleteTopics(Integer id) {
+        //todo Возвращай void
         Topics topics = topicsRepository.findById(id).get();
         topicsRepository.deleteById(id);
         return topicsConverter.convertToDTO(topics);
