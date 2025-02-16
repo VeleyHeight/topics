@@ -17,12 +17,9 @@ public class QuestionsDTO {
     @Valid
     @Transient
     private Integer id;
-    @NotNull(message = "Question is required")
     @NotBlank(message = "Question is blank")
     @Size(min = 5, max = 1000, message = "Question size must be between 5 and 1000")
     String question;
-    //todo для типа String всегда используй исключительно @NotBlank тк нулловый стринг это "" пустая строка
-    @NotNull(message = "Answer is required")
     @NotBlank(message = "Answer is blank")
     @Size(min = 5, max = 10000, message = "Answer size must be between 5 and 10000")
     String answer;

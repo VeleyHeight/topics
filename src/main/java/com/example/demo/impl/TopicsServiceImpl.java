@@ -10,6 +10,7 @@ import com.example.demo.dto.WeatherCityDTO;
 import com.example.demo.dto.WeatherDTO;
 import com.example.demo.dto.extended.ExtendedTopicsDTO;
 import com.example.demo.dto.extended.ExtendedQuestions;
+import com.example.demo.filter.TopicsFilter;
 import com.example.demo.model.Questions;
 import com.example.demo.model.Topics;
 import com.example.demo.repository.QuestionsRepository;
@@ -19,6 +20,7 @@ import com.example.demo.service.TopicsService;
 import jakarta.validation.*;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,11 +33,11 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 //todo @Slf4j для логгера вместо статик поля
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TopicsServiceImpl implements TopicsService {
     //todo !!!оставить только поля топиков, остальное убрать, конвертер замени на Mapper, используй mapstruct
-    private static final Logger log = LoggerFactory.getLogger(TopicsServiceImpl.class);
     private final ReactionsRepository reactionsRepository;
     private final ReactionsConverter reactionsConverter;
     private final Validator validator;
@@ -48,16 +50,9 @@ public class TopicsServiceImpl implements TopicsService {
     @Value("${openfeign.api.key}")
     private String apiKey;
 
-    //todo дефолтный Page нестабилен, нужно либо писать свою реализацию, либо после 3.3+ spring исползуй PagedModel <T>
     @Override
-    public Page<TopicsDTO> findAll(Pageable pageable) {
-        return topicsConverter.convertToDTOPage(topicsRepository.findAll(pageable));
-    }
-
-    //todo Вместо поля title используй создание спецификации из фильтра в зависимости от значения полей, проверь граничные значения пагинирования, а так-же отрицательные значения и значение 0 в LIMIT
-    @Override
-    public Page<TopicsDTO> findAllByTitleContainingIgnoreCase(String title, Pageable pageable) {
-        return topicsConverter.convertToDTOPage(topicsRepository.findAllByTitleContainingIgnoreCase(title, pageable));
+    public Page<TopicsDTO> findAll(TopicsFilter filter, Pageable pageable) {
+        return topicsConverter.convertToDTOPage(topicsRepository.findAll(filter.specification(),pageable));
     }
 
     @Override
@@ -109,8 +104,8 @@ public class TopicsServiceImpl implements TopicsService {
         if (body.containsKey("description") && body.get("description") != null) {
             topicsDTO.setDescription(body.get("description"));
         }
-        if (body.containsKey("parentId")) {
-            topicsDTO.setParentId(Integer.valueOf(body.get("parentId")));
+        if (body.containsKey("parentId")) {//todo исправить null в остальных сервисах
+            topicsDTO.setParentId((body.get("parentId") == null)?(null):(Integer.valueOf(body.get("parentId"))));
         }
         Set<ConstraintViolation<TopicsDTO>> violations = validator.validate(topicsDTO);
         if (!violations.isEmpty()) {

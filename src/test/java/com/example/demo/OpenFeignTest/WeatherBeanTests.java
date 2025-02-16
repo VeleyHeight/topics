@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -25,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.HashMap;
 import java.util.List;
 
+@ActiveProfiles("test")
 @Testcontainers
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -35,8 +37,6 @@ class WeatherBeanTests {
     private GetWeather getWeather;
     @Autowired
     private TopicsService topicsService;
-    @Autowired
-    private TopicsCRUDController topicsCRUDController;
     @Autowired
     private MockMvc mockMvc;
     @Value("${openfeign.api.key}")

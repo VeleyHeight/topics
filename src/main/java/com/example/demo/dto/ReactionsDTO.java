@@ -12,11 +12,8 @@ import lombok.Data;
 public class ReactionsDTO {
     @Transient
     Integer id;
-    //todo для типа String всегда используй исключительно @NotBlank тк нулловый стринг это "" пустая строка
     @NotBlank(message = "User is blank")
-    @NotNull(message = "User is required")
     String user_id;
-    @NotNull(message = "Type is blank")
     @NotBlank(message = "Type is required")
     @Size(min = 2, max = 50, message = "Type size must be between 2 and 50")
     String type;

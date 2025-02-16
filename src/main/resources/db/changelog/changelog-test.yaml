@@ -5,3 +5,9 @@ databaseChangeLog:
       file: db/changelog/changeset/002_create_questions_table.sql
   - include:
       file: db/changelog/changeset/003_create_reactions_table.sql
+  - include:
+      file: db/changelog/changeset/004_insert_topics_table.sql
+  - include:
+      file: db/changelog/changeset/005_insert_questions_table.sql
+  - include:
+      file: db/changelog/changeset/006_insert_reactions_table.sql

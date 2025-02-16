@@ -1,6 +1,5 @@
 --liquibase formatted sql
 --changeset postgres:004_insert_topics_table
---Инсерты для тестов должны отрабатывать только при запуске спринг-профиля test, добавь application-test.yml и вызывай эти скрипты только в нем!!!!
 
 insert into topics(title, description, parent_id) VALUES ('Литература','Топики на темы, связанные с книгами и чтением',null);
 insert into topics(title, description, parent_id) VALUES ('Books and libraries','В этом топике вы можете вы можете прочитать об истории некоторых знаменитых библиотек, а также о влиянии чтения на нашу жизнь',1);

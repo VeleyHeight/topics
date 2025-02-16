@@ -5,7 +5,9 @@ import com.example.demo.client.GetWeather;
 import com.example.demo.dto.TopicsDTO;
 import com.example.demo.dto.WeatherCityDTO;
 import com.example.demo.dto.WeatherDTO;
+import com.example.demo.filter.TopicsFilter;
 import com.example.demo.model.Topics;
+import com.example.demo.repository.TopicsRepository;
 import com.example.demo.service.TopicsService;
 import jakarta.validation.*;
 import jakarta.validation.constraints.NotBlank;
@@ -14,16 +16,20 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.boot.context.properties.bind.Nested;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.*;
 
@@ -38,24 +44,16 @@ public class TopicsCRUDController {
         return topicsService.getWeatherInCity(city);
     }
 
-    //todo Вместо отдельных полей испольуй @ParameterObject @ModelAttribute TopicFilter filter типа record и создавай там спецификации для проверки
     @GetMapping
-    public ResponseEntity<Page<TopicsDTO>> getAllTopics(@RequestParam(required = false) String title,
-                                                        @RequestParam(defaultValue = "0") int page,
-                                                        @RequestParam(defaultValue = "10") int size) {
-        if (title != null && !title.isEmpty()) {
-            return ResponseEntity.ok(topicsService.findAllByTitleContainingIgnoreCase(title, PageRequest.of(page, size)));
-        }
-        return ResponseEntity.ok(topicsService.findAll(PageRequest.of(page, size)));
+    public ResponseEntity<PagedModel<TopicsDTO>> getAllTopics(@ModelAttribute @ParameterObject TopicsFilter filter, @PageableDefault @ParameterObject Pageable pageable) {
+        return ResponseEntity.ok(new PagedModel<>(topicsService.findAll(filter, pageable)));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getTopicsById(@PathVariable Integer id) {
-        if (topicsService.findById(id) == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id is not exist");
-        } else {
-            return ResponseEntity.ok(topicsService.findById(id));
-        }
+        return (topicsService.findById(id) == null)?
+                (ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id is not exist")):
+                (ResponseEntity.ok(topicsService.findById(id)));
     }
 
     @PostMapping
@@ -113,16 +111,4 @@ public class TopicsCRUDController {
         }
     }
 
-    //todo создай отдельный класс GlobalExceptionHandler для обработки в нем всех исключений приложения!!!
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return errors;
-    }
 }
