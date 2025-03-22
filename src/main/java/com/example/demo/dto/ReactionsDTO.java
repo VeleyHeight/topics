@@ -1,6 +1,5 @@
 package com.example.demo.dto;
 
-import com.example.demo.validation.reactions.ValidationReactionsDTO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotBlank;
@@ -17,6 +16,5 @@ public class ReactionsDTO {
     @NotBlank(message = "Type is required")
     @Size(min = 2, max = 50, message = "Type size must be between 2 and 50")
     String type;
-    @ValidationReactionsDTO
     Integer questionsId;
 }

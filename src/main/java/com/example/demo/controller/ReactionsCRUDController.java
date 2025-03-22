@@ -24,7 +24,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @RequestMapping("/reactions")
 public class ReactionsCRUDController {
-    private final ReactionsService reactionsService;
+    private ReactionsService reactionsService;
 
     @GetMapping
     public ResponseEntity<List<ReactionsDTO>> getAllTopics() {
@@ -41,7 +41,7 @@ public class ReactionsCRUDController {
         if (reactionsService.findById(id) == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Reactions with this id is not exist");
         }
-        reactionsDTO.setId(id);
+//        reactionsDTO.setId(id); todo нужна замена в dto
         return ResponseEntity.ok(reactionsService.updateReactions(reactionsDTO));
     }
 

@@ -1,12 +1,13 @@
 package com.example.demo.dto;
 
-import com.example.demo.validation.questions.ValidationQuestionsDTO;
 import jakarta.persistence.Transient;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -15,6 +16,7 @@ import java.sql.Timestamp;
 @Data
 public class QuestionsDTO {
     @Valid
+
     @Transient
     private Integer id;
     @NotBlank(message = "Question is blank")
@@ -25,7 +27,6 @@ public class QuestionsDTO {
     String answer;
     boolean is_popular;
     @NotNull
-    @ValidationQuestionsDTO
     Integer topicId;
     @Transient
     @CreationTimestamp

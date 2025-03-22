@@ -22,7 +22,7 @@ import java.util.Map;
 @AllArgsConstructor
 @RequestMapping("/questions")
 public class QuestionsCRUDController {
-    private final QuestionsService questionsService;
+    private QuestionsService questionsService;
 
     @GetMapping
     public ResponseEntity<Page<QuestionsDTO>> getAllQuestions(@RequestParam(required = false) String questions,
@@ -54,7 +54,7 @@ public class QuestionsCRUDController {
         if (questionsService.findById(id) == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Question with this id is not exist");
         }
-        questionsDTO.setId(id);
+//        questionsDTO.setId(id); //todo ????
         return ResponseEntity.ok(questionsService.updateQuestions(questionsDTO));
     }
 

@@ -16,7 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import org.springdoc.api.annotations.ParameterObject;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.boot.context.properties.bind.Nested;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/topics")
 public class TopicsCRUDController {
     private final TopicsService topicsService;
@@ -51,9 +51,7 @@ public class TopicsCRUDController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getTopicsById(@PathVariable Integer id) {
-        return (topicsService.findById(id) == null)?
-                (ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id is not exist")):
-                (ResponseEntity.ok(topicsService.findById(id)));
+        return ResponseEntity.ok(topicsService.findById(id));
     }
 
     @PostMapping
@@ -63,43 +61,17 @@ public class TopicsCRUDController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTopics(@PathVariable Integer id, @Valid @RequestBody TopicsDTO topicsDTO) {
-        if (topicsService.findById(id) == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id is not exist");
-        }
-        if (topicsDTO.getParentId() != null && topicsDTO.getParentId().equals(id)) {
-            return ResponseEntity.badRequest().body("Parent id cannot be equals topic id");
-        }
-        topicsDTO.setId(id);
-        return ResponseEntity.ok(topicsService.updateTopics(topicsDTO));
+        return ResponseEntity.ok(topicsService.updateTopics(id, topicsDTO));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> patchTopics(@PathVariable Integer id, @RequestBody HashMap<String, String> body) {
-        if (topicsService.findById(id) == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id is not exist");
-        }
-        if (!body.containsKey("parentId") && !body.containsKey("title") && !body.containsKey("description")) {
-            return ResponseEntity.badRequest().body("Input is empty");
-        }
-        if (body.containsKey("parentId") && body.get("parentId") != null && body.get("parentId").equals(id.toString())) {
-            return ResponseEntity.badRequest().body("Parent id cannot be equals topic id");
-        }
-        TopicsDTO topics;
-        try {
-            topics = topicsService.patchTopics(body, id);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(topics);
+    public ResponseEntity<?> patchTopics(@PathVariable Integer id, @RequestBody Map<String, String> body) {
+        return ResponseEntity.status(HttpStatus.OK).body(topicsService.patchTopics(body, id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTopics(@PathVariable Integer id) {
-        if (topicsService.findById(id) == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id does not exist");
-        } else {
-            return ResponseEntity.status(HttpStatus.OK).body(topicsService.deleteTopics(id));
-        }
+    public void deleteTopics(@PathVariable Integer id) {
+        topicsService.deleteTopics(id);
     }
 
     @GetMapping("/extended/{id}")

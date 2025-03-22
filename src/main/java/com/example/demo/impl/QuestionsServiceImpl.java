@@ -2,11 +2,12 @@ package com.example.demo.impl;
 
 import com.example.demo.converter.QuestionsConverter;
 import com.example.demo.converter.ReactionsConverter;
-import com.example.demo.converter.TopicsConverter;
 import com.example.demo.dto.ReactionsDTO;
 import com.example.demo.dto.extended.ExtendedQuestions;
 import com.example.demo.dto.extended.ExtendedTopicsDTO;
 import com.example.demo.dto.QuestionsDTO;
+import com.example.demo.mapstruct.QuestionsMapper;
+import com.example.demo.mapstruct.TopicsMapper;
 import com.example.demo.model.Questions;
 import com.example.demo.model.Topics;
 import com.example.demo.repository.QuestionsRepository;
@@ -17,6 +18,8 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,14 +27,14 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class QuestionsServiceImpl implements QuestionsService {
-    private final ReactionsConverter reactionsConverter;
+
     private QuestionsRepository questionsRepository;
     private TopicsRepository topicsRepository;
     private ReactionsRepository reactionsRepository;
-    private TopicsConverter topicsConverter;
     private QuestionsConverter questionsConverter;
+    private TopicsMapper topicsMapper;
     private Validator validator;
 
     @Override
@@ -112,20 +115,21 @@ public class QuestionsServiceImpl implements QuestionsService {
 
     @Override
     public ExtendedTopicsDTO findByIdExtended(Integer id) {
-        List<Questions> questionsList = new ArrayList<>();
-        Optional<Questions> optionalQuestions = questionsRepository.findById(id);
-        Topics topics;
-        if (optionalQuestions.isPresent()) {
-            questionsList.add(optionalQuestions.get());
-            topics = topicsRepository.findAllByQuestions(questionsList);
-            List<ExtendedQuestions> extendedQuestionsList = new ArrayList<>();
-            List<ReactionsDTO> reactionsList = reactionsConverter.convertToListDTO(reactionsRepository.findAllByQuestionsId(optionalQuestions.get()));
-            extendedQuestionsList.add(new ExtendedQuestions(optionalQuestions.get().getId(), optionalQuestions.get().getQuestion(), optionalQuestions.get().getAnswer(), optionalQuestions.get().is_popular(), reactionsList));
-            ExtendedTopicsDTO extendedTopicsDTO = new ExtendedTopicsDTO(topicsConverter.convertToDTO(topics), extendedQuestionsList);
-            return extendedTopicsDTO;
-        } else {
-            return null;
-        }
+//        List<Questions> questionsList = new ArrayList<>();
+//        Optional<Questions> optionalQuestions = questionsRepository.findById(id);
+//        Topics topics;
+//        if (optionalQuestions.isPresent()) {
+//            questionsList.add(optionalQuestions.get());
+//            topics = topicsRepository.findAllByQuestions(questionsList);
+//            List<ExtendedQuestions> extendedQuestionsList = new ArrayList<>();
+//            List<ReactionsDTO> reactionsList = reactionsConverter.convertToListDTO(reactionsRepository.findAllByQuestionsId(optionalQuestions.get()));
+//            extendedQuestionsList.add(new ExtendedQuestions(optionalQuestions.get().getId(), optionalQuestions.get().getQuestion(), optionalQuestions.get().getAnswer(), optionalQuestions.get().is_popular(), reactionsList));
+//            ExtendedTopicsDTO extendedTopicsDTO = new ExtendedTopicsDTO(topics.getId(), topicsMapper.toTopicsDTO(topics), extendedQuestionsList);
+//            return extendedTopicsDTO;
+//        } else {
+//            return null;
+//        } //todo нужна замена на маппер
+        return null;
     }
 
 }

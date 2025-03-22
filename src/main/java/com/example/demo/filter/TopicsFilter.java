@@ -3,7 +3,7 @@ package com.example.demo.filter;
 import com.example.demo.model.Topics;
 import org.springframework.data.jpa.domain.Specification;
 
-public record TopicsFilter(String title, String description, Integer parentId) {
+public record TopicsFilter(String title, String description, String parentId) {
     public Specification<Topics> specification() {
         return Specification.where(containingTitle()).and(containingDescription()).and(containingParentId());
     }
@@ -26,13 +26,20 @@ public record TopicsFilter(String title, String description, Integer parentId) {
         });
     }
 
-    private Specification<Topics> containingParentId() { //todo не доделана проверка на соответствие для спецификации
+    private Specification<Topics> containingParentId() { //todo не доделана проверка на соответствие для спецификации (не протестирована)
         return ((root, query, criteriaBuilder) -> {
             if(parentId == null){
                 return null;
             }
-//            System.out.println(criteriaBuilder.isNotNull(root.get("parentId").get("id")));
-            return criteriaBuilder.equal(root.get("parentId"), parentId);
+            else if (parentId.equalsIgnoreCase("null")){
+                return criteriaBuilder.isNull(root.get("parentId"));
+            }
+            try {
+                return criteriaBuilder.equal(root.get("parentId").get("id"), Integer.valueOf(parentId));
+            }
+            catch (Exception e) {
+                return criteriaBuilder.conjunction();
+            }
         });
     }
 

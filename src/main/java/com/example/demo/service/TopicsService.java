@@ -10,19 +10,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public interface TopicsService {
     Page<TopicsDTO> findAll(TopicsFilter filter, Pageable pageable);
 
     TopicsDTO saveTopics(TopicsDTO topics);
 
-    TopicsDTO deleteTopics(Integer id);
+    void deleteTopics(Integer id);
 
-    TopicsDTO updateTopics(TopicsDTO topics);
+    TopicsDTO updateTopics(Integer id, TopicsDTO topics);
 
-    //todo
-    // Нужно использовать вместо HashMap - Map, смотри принципы SOLID!!
-    TopicsDTO patchTopics(HashMap<String, String> map, Integer id);
+    TopicsDTO patchTopics(Map<String, String> map, Integer id);
 
     TopicsDTO findById(Integer id);
 

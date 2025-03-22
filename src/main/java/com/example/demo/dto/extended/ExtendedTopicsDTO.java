@@ -18,23 +18,23 @@ public class ExtendedTopicsDTO {
     Integer parentId;
     List<ExtendedQuestions> questions = new ArrayList<>();
 
-    public ExtendedTopicsDTO(TopicsDTO topics, List<ExtendedQuestions> questionsList) {
-        this.id = topics.getId();
-        this.title = topics.getTitle();
-        this.description = topics.getDescription();
-        this.created_at = topics.getCreated_at();
-        this.updated_at = topics.getUpdated_at();
-        this.parentId = topics.getParentId();
+    public ExtendedTopicsDTO(Integer id, TopicsDTO topics, List<ExtendedQuestions> questionsList) {
+        this.id = id;
+        this.title = topics.title();
+        this.description = topics.description();
+        this.created_at = topics.created_at();
+        this.updated_at = topics.updated_at();
+        this.parentId = topics.parentId();
         this.questions = questionsList;
     }
 
-    public ExtendedTopicsDTO(TopicsDTO topics) {
-        this.id = topics.getId();
-        this.title = topics.getTitle();
-        this.description = topics.getDescription();
-        this.created_at = topics.getCreated_at();
-        this.updated_at = topics.getUpdated_at();
-        this.parentId = topics.getParentId();
+    public ExtendedTopicsDTO(Integer id,TopicsDTO topics) {
+        this.id = id;
+        this.title = topics.title();
+        this.description = topics.description();
+        this.created_at = topics.created_at();
+        this.updated_at = topics.updated_at();
+        this.parentId = topics.parentId();
 
     }
 }
