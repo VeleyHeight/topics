@@ -4,6 +4,7 @@ import com.example.demo.model.Topics;
 import org.springframework.data.jpa.domain.Specification;
 
 public record TopicsFilter(String title, String description, String parentId) {
+
     public Specification<Topics> specification() {
         return Specification.where(containingTitle()).and(containingDescription()).and(containingParentId());
     }
@@ -35,7 +36,7 @@ public record TopicsFilter(String title, String description, String parentId) {
                 return criteriaBuilder.isNull(root.get("parentId"));
             }
             try {
-                return criteriaBuilder.equal(root.get("parentId").get("id"), Integer.valueOf(parentId));
+                return criteriaBuilder.equal(root.get("parentId").get("id"), Integer.parseInt(parentId));
             }
             catch (Exception e) {
                 return criteriaBuilder.conjunction();

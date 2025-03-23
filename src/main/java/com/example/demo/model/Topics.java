@@ -46,6 +46,4 @@ public class Topics {
     @UpdateTimestamp
     private Timestamp updated_at;
 
-    @Version
-    private Integer version;
 }

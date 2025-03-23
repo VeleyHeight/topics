@@ -21,7 +21,7 @@ public interface TopicsService {
 
     TopicsDTO updateTopics(Integer id, TopicsDTO topics);
 
-    TopicsDTO patchTopics(Map<String, String> map, Integer id);
+    TopicsDTO patchTopics(TopicsFilter topicsFilter, Integer id);
 
     TopicsDTO findById(Integer id);
 

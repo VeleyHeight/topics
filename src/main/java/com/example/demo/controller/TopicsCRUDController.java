@@ -65,8 +65,8 @@ public class TopicsCRUDController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> patchTopics(@PathVariable Integer id, @RequestBody Map<String, String> body) {
-        return ResponseEntity.status(HttpStatus.OK).body(topicsService.patchTopics(body, id));
+    public ResponseEntity<?> patchTopics(@PathVariable Integer id, @RequestBody TopicsFilter topicsFilter) {
+        return ResponseEntity.status(HttpStatus.OK).body(topicsService.patchTopics(topicsFilter, id));
     }
 
     @DeleteMapping("/{id}")

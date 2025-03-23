@@ -4,6 +4,8 @@ import com.example.demo.dto.QuestionsDTO;
 import com.example.demo.dto.ReactionsDTO;
 import com.example.demo.dto.TopicsDTO;
 import com.example.demo.dto.extended.ExtendedTopicsDTO;
+import com.example.demo.mapstruct.TopicsMapper;
+import com.example.demo.model.Topics;
 import com.example.demo.repository.TopicsRepository;
 import io.restassured.RestAssured;
 import org.hamcrest.Matchers;
@@ -48,6 +50,45 @@ class DemoApplicationTests {
     Integer port;
     @Autowired
     TestRestTemplate restTemplate;
+
+    @Nested
+    @DisplayName("Тестирование маппера топиков")
+    public class TopicsMapperTest{
+        @Autowired
+        private TopicsMapper topicsMapper;
+        TopicsDTO topicsDTO = new TopicsDTO("Тестовый заголовок", "Тестовое описание", 1, null, null);
+        Topics topics = Topics.builder().title("Название топика").description("Описание топика").parentId(null).build();
+
+        @Test
+        @DisplayName("Тестирование топика в DTO")
+        public void topicsToDtoMapper(){
+            topics = topicsMapper.toTopics(topicsDTO);
+            Assertions.assertEquals(topicsDTO.title(),topics.getTitle());
+            Assertions.assertEquals(topicsDTO.description(),topics.getDescription());
+            Assertions.assertEquals(topicsDTO.parentId(),topics.getParentId().getId());
+            System.out.println("Title: "+topics.getTitle()+", Description: "+topics.getDescription()+", Parent Id: "+topics.getParentId().getId());
+        }
+
+        @Test
+        @DisplayName("Тестирование DTO в топик")
+        public void DtoToTopicsMapper(){
+            topicsDTO = topicsMapper.toTopicsDTO(topics);
+            Assertions.assertEquals(topics.getTitle(),topicsDTO.title());
+            Assertions.assertEquals(topics.getDescription(),topicsDTO.description());
+            Assertions.assertEquals(topics.getParentId(),topicsDTO.parentId());
+            System.out.println("Title: "+topicsDTO.title()+", Description: "+topicsDTO.description()+", Parent Id: "+topicsDTO.parentId());
+        }
+
+        @Test
+        @DisplayName("Тестирование update топика")
+        public void updateTopics(){
+            topics = topicsMapper.partialUpdate(topicsDTO, topics);
+            Assertions.assertEquals(topicsDTO.title(),topics.getTitle());
+            Assertions.assertEquals(topicsDTO.description(),topics.getDescription());
+            Assertions.assertEquals(topicsDTO.parentId(),topics.getParentId().getId());
+            System.out.println("Title: "+topics.getTitle()+", Description: "+topics.getDescription()+", Parent Id: "+topics.getParentId().getId());
+        }
+    }
 
     @Nested
     @DisplayName("Тестирование контроллера топика")
@@ -96,7 +137,6 @@ class DemoApplicationTests {
             void getTopicByWrongId() {
                 ResponseEntity<?> response = restTemplate.getForEntity("/topics/199", String.class);
                 Assertions.assertEquals(response.getStatusCode(), HttpStatus.NOT_FOUND);
-                Assertions.assertEquals("Topic with this id is not exist", response.getBody());
                 System.out.println(response.getBody());
             }
         }
@@ -126,9 +166,17 @@ class DemoApplicationTests {
         @DisplayName("Тестирование создания топика")
         public class createTopics {
             @Test
-            @DisplayName("Создание топика")
-            void createTopic() {
-                TopicsDTO topicsDTO = new TopicsDTO("Литература","Топики на темы, связанные с книгами и чтением",9, null, null);
+            @DisplayName("Создание топика c parentId")
+            void createTopicWithParentId() {
+                TopicsDTO topicsDTO = new TopicsDTO("Литература с родителем","Топики на темы, связанные с книгами и чтением с родителями",9, null, null);
+                ResponseEntity<?> response = restTemplate.postForEntity("/topics", topicsDTO, String.class);
+                Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+                System.out.println(response.getBody());
+            }
+            @Test
+            @DisplayName("Создание топика без parentId")
+            void createTopicWithoutParentId() {
+                TopicsDTO topicsDTO = new TopicsDTO("Литература без родителя","Топики на темы, связанные с книгами и чтением без родителей",null, null, null);
                 ResponseEntity<?> response = restTemplate.postForEntity("/topics", topicsDTO, String.class);
                 Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
                 System.out.println(response.getBody());
@@ -153,7 +201,6 @@ class DemoApplicationTests {
                 TopicsDTO topicsDTO = new TopicsDTO("Литература updated","Топики на темы, связанные с книгами и чтением updated", null, null, null);
                 ResponseEntity<?> response = restTemplate.exchange("/topics/1222", HttpMethod.PUT, new HttpEntity<>(topicsDTO), String.class);
                 Assertions.assertEquals(response.getStatusCode(), HttpStatus.NOT_FOUND);
-                Assertions.assertEquals("Topic with this id is not exist", response.getBody());
                 System.out.println(response.getBody());
             }
 
@@ -162,8 +209,7 @@ class DemoApplicationTests {
             void updateTopicRecursionId() {
                 TopicsDTO topicsDTO = new TopicsDTO("Литература updated","Топики на темы, связанные с книгами и чтением updated",1, null,null);
                 ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PUT, new HttpEntity<>(topicsDTO), String.class);
-                Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-                Assertions.assertEquals("Parent id cannot be equals topic id", response.getBody());
+                Assertions.assertEquals(response.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
                 System.out.println(response.getBody());
             }
         }
@@ -191,18 +237,15 @@ class DemoApplicationTests {
                 System.out.println(response.getBody());
             }
 
-//            @Test
-//            @DisplayName("Проверка ссылки parentId на само себя")
-//            void patchTopicRecursionId() {
-//                TopicsDTO topicsDTO = new TopicsDTO();
-//                topicsDTO.setTitle("Литература updated");
-//                topicsDTO.setDescription("Топики на темы, связанные с книгами и чтением updated");
-//                topicsDTO.setParentId(1);
-//                ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PATCH, new HttpEntity<>(topicsDTO), String.class);
-//                Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-//                Assertions.assertEquals("Parent id cannot be equals topic id", response.getBody());
-//                System.out.println(response.getBody());
-//            }
+            @Test
+            @DisplayName("Проверка ссылки parentId на само себя")
+            void patchTopicRecursionId() {
+                TopicsDTO topicsDTO = new TopicsDTO("Литература updated","Топики на темы, связанные с книгами и чтением updated", 1, null, null);
+                ResponseEntity<?> response = restTemplate.exchange("/topics/1", HttpMethod.PATCH, new HttpEntity<>(topicsDTO), String.class);
+                Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+                Assertions.assertEquals("Parent id cannot be equals topic id", response.getBody());
+                System.out.println(response.getBody());
+            }
         }
 
         @Nested

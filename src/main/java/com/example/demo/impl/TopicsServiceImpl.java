@@ -71,9 +71,8 @@ public class TopicsServiceImpl implements TopicsService {
         if (topicsDTO.parentId() != null && topicsDTO.parentId().equals(id)) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Parent id cannot be equals topic id");
         }
-//        topicsMapper.partialUpdate(topicsDTO, topics);
-//        return topicsMapper.toTopicsDTO(topicsRepository.save(topics));
-        return null;
+        topicsMapper.partialUpdate(topicsDTO, topics);
+        return topicsMapper.toTopicsDTO(topicsRepository.save(topics));
     }
     @Override
     public void deleteTopics(Integer id) {
@@ -90,7 +89,7 @@ public class TopicsServiceImpl implements TopicsService {
 
     //todo Проверки в Optional, MAP/SOLID, вынеси проверки is/in полей в filter и в нем создавай спецификаци для запроса, repository экстенди от specification executor
     @Override
-    public TopicsDTO patchTopics(Map<String, String> body, Integer id) {
+    public TopicsDTO patchTopics(TopicsFilter topicsFilter, Integer id) {
         //        if (topicsService.findById(id) == null) {
 //            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id is not exist");
 //        }
@@ -126,7 +125,7 @@ public class TopicsServiceImpl implements TopicsService {
 //        if (body.containsKey("parentId")) {//todo исправить null в остальных сервисах
 //            topicsDTO.setParentId((body.get("parentId") == null)?(null):(Integer.valueOf(body.get("parentId"))));
 //        }
-//        Set<ConstraintViolation<TopicsDTO>> violations = validator.validate(topicsDTO);
+//        Set<ConstraintViolation<TopicsDTO>> violations = validator.validate(topicsDTO);//todo ручной вызов валидации
 //        if (!violations.isEmpty()) {
 //            throw new ConstraintViolationException(violations);
 //        }
