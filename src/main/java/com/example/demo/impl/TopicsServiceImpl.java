@@ -20,6 +20,7 @@ import com.example.demo.service.TopicsService;
 import jakarta.validation.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +37,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class TopicsServiceImpl implements TopicsService {
     //todo !!!оставить только поля топиков, остальное убрать, конвертер замени на Mapper, используй mapstruct
+    @Autowired
+    private final Validator validator;
     private final ReactionsRepository reactionsRepository;
     private final ReactionsConverter reactionsConverter;
     private final TopicsRepository topicsRepository;
@@ -43,6 +46,7 @@ public class TopicsServiceImpl implements TopicsService {
     private final GetCityWeather getCityWeather;
     private final GetWeather getWeather;
     private final TopicsMapper topicsMapper;
+
     //todo Вынеси @Value в рекорд класс пропертей и сюда инжекти их
     @Value("${openfeign.api.key}")
     private String apiKey;
@@ -71,7 +75,7 @@ public class TopicsServiceImpl implements TopicsService {
         if (topicsDTO.parentId() != null && topicsDTO.parentId().equals(id)) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Parent id cannot be equals topic id");
         }
-        topicsMapper.partialUpdate(topicsDTO, topics);
+        topicsMapper.updateWithNull(topicsDTO, topics);
         return topicsMapper.toTopicsDTO(topicsRepository.save(topics));
     }
     @Override
@@ -90,58 +94,13 @@ public class TopicsServiceImpl implements TopicsService {
     //todo Проверки в Optional, MAP/SOLID, вынеси проверки is/in полей в filter и в нем создавай спецификаци для запроса, repository экстенди от specification executor
     @Override
     public TopicsDTO patchTopics(TopicsFilter topicsFilter, Integer id) {
-        //        if (topicsService.findById(id) == null) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id is not exist");
-//        }
-//        if (!body.containsKey("parentId") && !body.containsKey("title") && !body.containsKey("description")) {
-//            return ResponseEntity.badRequest().body("Input is empty");
-//        }
-//        if (body.containsKey("parentId") && body.get("parentId") != null && body.get("parentId").equals(id.toString())) {
-//            return ResponseEntity.badRequest().body("Parent id cannot be equals topic id");
-//        }
-//        TopicsDTO topics;
-//        try {
-//            topics = topicsService.patchTopics(body, id);
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().body(e.getMessage());
-//        }
-
-//        TopicsDTO topicsDTO = new TopicsDTO();
-//        Optional<Topics> topics = topicsRepository.findById(id);
-//        topicsDTO.setId(id);
-//        if (topics.get().getParentId() != null) {
-//            topicsDTO.setParentId(topics.get().getParentId().getId());
-//        } else {
-//            topicsDTO.setParentId(null);
-//        }
-//        topicsDTO.setTitle(topics.get().getTitle());
-//        topicsDTO.setDescription(topics.get().getDescription());
-//        if (body.containsKey("title") && body.get("title") != null) {
-//            topicsDTO.setTitle(body.get("title"));
-//        }
-//        if (body.containsKey("description") && body.get("description") != null) {
-//            topicsDTO.setDescription(body.get("description"));
-//        }
-//        if (body.containsKey("parentId")) {//todo исправить null в остальных сервисах
-//            topicsDTO.setParentId((body.get("parentId") == null)?(null):(Integer.valueOf(body.get("parentId"))));
-//        }
-//        Set<ConstraintViolation<TopicsDTO>> violations = validator.validate(topicsDTO);//todo ручной вызов валидации
-//        if (!violations.isEmpty()) {
-//            throw new ConstraintViolationException(violations);
-//        }
-//        if (topicsDTO.getParentId() != null) {
-//            topics.get().setParentId(topicsRepository.findById(topicsDTO.getParentId()).get());
-//        } else {
-//            topics.get().setParentId(null);
-//        }
-//        topics.get().setTitle(topicsDTO.getTitle());
-//        topics.get().setDescription(topicsDTO.getDescription());
-//        topicsRepository.save(topics.get());
-//        topicsDTO.setCreated_at(topics.get().getCreated_at());
-//        topicsDTO.setUpdated_at(topics.get().getUpdated_at());
-
         Topics topics = topicsRepository.findById(id).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found with ID: " + id));
-
+        topicsMapper.patchingUpdate(topicsFilter.newPatchDTO(id),topics);
+        Set<ConstraintViolation<Topics>> violations = validator.validate(topics);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+        topicsRepository.save(topics);
         return topicsMapper.toTopicsDTO(topics);
     }
 

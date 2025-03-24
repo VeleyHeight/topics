@@ -2,12 +2,7 @@ package com.example.demo.mapstruct;
 
 import com.example.demo.dto.TopicsDTO;
 import com.example.demo.model.Topics;
-import com.example.demo.repository.TopicsRepository;
 import org.mapstruct.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 
@@ -31,5 +26,12 @@ public interface TopicsMapper {
     @Mapping(target = "created_at", ignore = true)
     @Mapping(target = "updated_at", expression = "java(new Timestamp(System.currentTimeMillis()))")
     @Mapping(target = "parentId", qualifiedByName = {"TopicsMapperUtils","createTopicsFromParent"}, source = "parentId")
-    Topics partialUpdate(TopicsDTO topicsDTO, @MappingTarget Topics topics);
+    Topics updateWithNull(TopicsDTO topicsDTO, @MappingTarget Topics topics);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "created_at", ignore = true)
+    @Mapping(target = "updated_at", expression = "java(new Timestamp(System.currentTimeMillis()))")
+    @Mapping(target = "parentId", qualifiedByName = {"TopicsMapperUtils","createTopicsFromParent"}, source = "parentId")
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    Topics patchingUpdate(TopicsDTO topicsDTO, @MappingTarget Topics topics);
 }
