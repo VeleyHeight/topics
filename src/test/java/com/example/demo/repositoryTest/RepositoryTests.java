@@ -1,6 +1,8 @@
 package com.example.demo.repositoryTest;
 
 import com.example.demo.dto.ReactionsDTO;
+import com.example.demo.filter.QuestionsFilter;
+import com.example.demo.filter.TopicsFilter;
 import com.example.demo.model.Questions;
 import com.example.demo.model.Reactions;
 import com.example.demo.model.Topics;
@@ -74,6 +76,7 @@ class RepositoryTests {
     @Nested
     @DisplayName("Тестирование репозитория топиков")
     class topicsRepositoryTests {
+
         @Test
         @DisplayName("Поиск топика по id")
         void findById() {
@@ -94,8 +97,9 @@ class RepositoryTests {
         @Test
         @DisplayName("Поиск всех страниц с топиками")
         void findByPage() {
+            TopicsFilter topicsFilter = new TopicsFilter(null,null,null);
             Pageable topicsPageable = PageRequest.of(0, 10);
-            Page<Topics> topicsPage = topicsRepository.findAll(topicsPageable);
+            Page<Topics> topicsPage = topicsRepository.findAll(topicsFilter.specification(),topicsPageable);
             Assertions.assertTrue(topicsPage.getTotalElements() > 0);
         }
 
@@ -103,7 +107,8 @@ class RepositoryTests {
         @DisplayName("Поиск всех страниц с фильтрацией по title без регистра")
         void findByTitleIgnoreCase() {
             Pageable pageable = PageRequest.of(0, 10);
-            Page<Topics> topicsPage = topicsRepository.findAllByTitleContainingIgnoreCase("ЛИТЕРАТУРА 90-Х ГОДОВ", pageable);
+            TopicsFilter topicsFilter = new TopicsFilter("ЛИТЕРАТУРА 90-Х ГОДОВ",null,null);
+            Page<Topics> topicsPage = topicsRepository.findAll(topicsFilter.specification(), pageable);
             Assertions.assertTrue(topicsPage.getTotalElements() == 1);
             Assertions.assertEquals("Литература 90-х годов", topicsPage.getContent().get(0).getTitle());
         }
@@ -165,7 +170,8 @@ class RepositoryTests {
         @DisplayName("Поиск всех страниц с вопросами")
         void findByPage() {
             Pageable questionsPageable = PageRequest.of(0, 10);
-            Page<Questions> questionsPage = questionsRepository.findAll(questionsPageable);
+            QuestionsFilter questionsFilter = new QuestionsFilter(null, null, null, null);
+            Page<Questions> questionsPage = questionsRepository.findAll(questionsFilter.specification(),questionsPageable);
             Assertions.assertTrue(questionsPage.getTotalElements() > 0);
         }
 
@@ -173,7 +179,8 @@ class RepositoryTests {
         @DisplayName("Поиск всех страниц с фильтрацией по questions без регистра")
         void findByQuestionsIgnoreCase() {
             Pageable pageable = PageRequest.of(0, 10);
-            Page<Questions> questionsPage = questionsRepository.findAllByQuestionContainingIgnoreCase("КТО НАПИСАЛ 'Generation П'?", pageable);
+            QuestionsFilter questionsFilter = new QuestionsFilter("КТО НАПИСАЛ 'Generation П'?", null, null, null);
+            Page<Questions> questionsPage = questionsRepository.findAll(questionsFilter.specification(), pageable);
             Assertions.assertTrue(questionsPage.getTotalElements() == 1);
             Assertions.assertEquals("Кто написал 'Generation П'?", questionsPage.getContent().get(0).getQuestion());
         }

@@ -76,11 +76,7 @@ public class TopicsCRUDController {
 
     @GetMapping("/extended/{id}")
     public ResponseEntity<?> getTopicsByIdExtended(@PathVariable Integer id) {
-        if (topicsService.findById(id) == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Topic with this id does not exist");
-        } else {
-            return ResponseEntity.ok(topicsService.findByIdExtended(id));
-        }
+        return ResponseEntity.ok(topicsService.findByIdExtended(id));
     }
 
 }

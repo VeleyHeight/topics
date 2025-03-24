@@ -13,7 +13,5 @@ import java.util.List;
 //todo необязательная аннотация
 @Table(name = "topics")
 public interface TopicsRepository extends JpaRepository<Topics, Integer>, JpaSpecificationExecutor<Topics> {
-    Page<Topics> findAllByTitleContainingIgnoreCase(String title, Pageable pageable);
-
     Topics findAllByQuestions(List<Questions> questions);
 }

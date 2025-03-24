@@ -13,8 +13,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
-//todo @Data избыточна, используй отдельные аннотации, измени классы на record и добавь валидацию полей при создании dto!!!
-
 public record TopicsDTO(
         @Valid
         @NotBlank(message = "Title is blank")

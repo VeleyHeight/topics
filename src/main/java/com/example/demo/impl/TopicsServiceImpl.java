@@ -40,9 +40,9 @@ public class TopicsServiceImpl implements TopicsService {
     @Autowired
     private final Validator validator;
     private final ReactionsRepository reactionsRepository;
-    private final ReactionsConverter reactionsConverter;
-    private final TopicsRepository topicsRepository;
+    private final ReactionsConverter reactionsConverter; // todo заменить на маппер
     private final QuestionsRepository questionsRepository;
+    private final TopicsRepository topicsRepository;
     private final GetCityWeather getCityWeather;
     private final GetWeather getWeather;
     private final TopicsMapper topicsMapper;
@@ -58,15 +58,11 @@ public class TopicsServiceImpl implements TopicsService {
 
     @Override
     public TopicsDTO saveTopics(TopicsDTO topicsDTO) {
-        Topics topics = Topics.builder()
-                .title(topicsDTO.title())
-                .description(topicsDTO.description())
-                .parentId((topicsDTO.parentId() == null)?
-                        (null):
-                        (topicsRepository.findById(topicsDTO.parentId())
-                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found with ID: " + topicsDTO.parentId()))))
-                .build();
-        return topicsMapper.toTopicsDTO(topicsRepository.save(topics));
+        log.info("Начало создания топика: {}", topicsDTO);
+        Topics topics = topicsMapper.toTopics(topicsDTO);
+        var resultTopics = topicsRepository.save(topics);
+        log.info("Топик создан успешно {}", resultTopics);
+        return topicsMapper.toTopicsDTO(resultTopics);
     }
 
     @Override
@@ -83,15 +79,17 @@ public class TopicsServiceImpl implements TopicsService {
         if(topicsRepository.existsById(id)){
             topicsRepository.deleteById(id);
         }
+        else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found with ID: " + id);
+        }
     }
 
     @Override
     public TopicsDTO findById(Integer id) {
-        Topics topics = topicsRepository.findById(id).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic with this id is not exist"));
+        Topics topics = topicsRepository.findById(id).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found with ID: " + id));
         return topicsMapper.toTopicsDTO(topics);
     }
 
-    //todo Проверки в Optional, MAP/SOLID, вынеси проверки is/in полей в filter и в нем создавай спецификаци для запроса, repository экстенди от specification executor
     @Override
     public TopicsDTO patchTopics(TopicsFilter topicsFilter, Integer id) {
         Topics topics = topicsRepository.findById(id).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found with ID: " + id));
@@ -114,7 +112,7 @@ public class TopicsServiceImpl implements TopicsService {
                 List<ReactionsDTO> reactionsList;
                 for (Questions questions : questionsList) {
                     reactionsList = reactionsConverter.convertToListDTO(reactionsRepository.findAllByQuestionsId(questions));
-                    extendedQuestionsList.add(new ExtendedQuestions(questions.getId(), questions.getQuestion(), questions.getAnswer(), questions.is_popular(), reactionsList));
+                    extendedQuestionsList.add(new ExtendedQuestions(questions.getId(), questions.getQuestion(), questions.getAnswer(), questions.getIs_popular(), reactionsList));
                 }
                 extendedTopicsDTO = new ExtendedTopicsDTO(topics.getId(),topicsMapper.toTopicsDTO(topics), extendedQuestionsList);
             } else {

@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -17,27 +16,30 @@ import java.util.List;
 @Entity
 @Setter
 @Getter
-@Table
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Questions {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String question;
     @Column(columnDefinition = "TEXT")
     private String answer;
-    private boolean is_popular;
+    @Column(name = "is_popular")
+    private Boolean is_popular;
+    @Column(insertable = false, nullable = false, updatable = false)
     @CreationTimestamp
     private Timestamp created_at;
+    @Column(insertable = false, nullable = true)
     @UpdateTimestamp
     private Timestamp updated_at;
-    //todo !!! коллекции не используйются с типом EAGER тк может быть огромное количество записей в ней
     @JsonIgnore
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @OneToMany(mappedBy = "questionsId", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "questionsId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Reactions> reactions;
-    //todo LAZY
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "topic_id", nullable = false)
     private Topics topicId;
 }
