@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.dto.QuestionsDTO;
 import com.example.demo.dto.ReactionsDTO;
+import com.example.demo.filter.ReactionsFilter;
 import com.example.demo.model.Reactions;
 
 import java.util.HashMap;
@@ -12,12 +13,11 @@ public interface ReactionsService {
 
     ReactionsDTO saveReactions(ReactionsDTO reactionsDTO);
 
-    ReactionsDTO deleteReactions(Integer id);
+    void deleteReactions(Integer id);
 
-    ReactionsDTO updateReactions(ReactionsDTO reactions);
+    ReactionsDTO updateReactions(Integer id, ReactionsDTO reactions);
 
-    //todo Map вместо HashMap
-    ReactionsDTO patchTopics(HashMap<String, String> map, Integer id);
+    ReactionsDTO patchTopics(ReactionsFilter filter, Integer id);
 
     ReactionsDTO findById(Integer id);
 }

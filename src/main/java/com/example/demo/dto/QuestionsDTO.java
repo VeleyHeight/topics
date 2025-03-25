@@ -17,6 +17,7 @@ public record QuestionsDTO(
         String question,
         @Size(min = 5, max = 10000, message = "Answer size must be between 5 and 10000")
         String answer,
+        @NotNull
         Boolean is_popular,
         @NotNull
         Integer topicId,

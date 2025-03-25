@@ -86,13 +86,13 @@ class WeatherBeanTests {
             List<WeatherCityDTO> weatherCityDTO = getCityWeather.getGeoByCity(city, 1, apiKey);
             Assertions.assertNotNull(weatherCityDTO);
             Assertions.assertTrue(!weatherCityDTO.isEmpty());
-            Assertions.assertNotNull(weatherCityDTO.get(0).getLat());
-            Assertions.assertNotNull(weatherCityDTO.get(0).getLon());
+            Assertions.assertNotNull(weatherCityDTO.get(0).lat());
+            Assertions.assertNotNull(weatherCityDTO.get(0).lon());
             System.out.println(weatherCityDTO.get(0));
-            WeatherDTO weatherDTO = getWeather.getWeather(weatherCityDTO.get(0).getLat(), weatherCityDTO.get(0).getLon(), apiKey, "metric");
+            WeatherDTO weatherDTO = getWeather.getWeather(weatherCityDTO.get(0).lat(), weatherCityDTO.get(0).lon(), apiKey, "metric");
             Assertions.assertNotNull(weatherDTO);
-            Assertions.assertNotNull(weatherDTO.getMain());
-            Assertions.assertTrue(weatherDTO.getWeather().length > 0);
+            Assertions.assertNotNull(weatherDTO.main());
+            Assertions.assertTrue(weatherDTO.weather().length > 0);
             System.out.println(weatherDTO);
         }
 
@@ -110,8 +110,8 @@ class WeatherBeanTests {
             String city = "Ярославль";
             List<WeatherCityDTO> weatherCityDTO = getCityWeather.getGeoByCity(city, 1, apiKey);
             Assertions.assertTrue(!weatherCityDTO.isEmpty());
-            Assertions.assertNotNull(weatherCityDTO.get(0).getLat());
-            Assertions.assertNotNull(weatherCityDTO.get(0).getLon());
+            Assertions.assertNotNull(weatherCityDTO.get(0).lat());
+            Assertions.assertNotNull(weatherCityDTO.get(0).lon());
             System.out.println(weatherCityDTO.get(0));
         }
     }

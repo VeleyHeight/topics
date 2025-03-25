@@ -2,7 +2,6 @@ package com.example.demo.impl;
 
 import com.example.demo.client.GetCityWeather;
 import com.example.demo.client.GetWeather;
-import com.example.demo.converter.ReactionsConverter;
 import com.example.demo.dto.ReactionsDTO;
 import com.example.demo.dto.TopicsDTO;
 import com.example.demo.dto.WeatherCityDTO;
@@ -10,6 +9,7 @@ import com.example.demo.dto.WeatherDTO;
 import com.example.demo.dto.extended.ExtendedTopicsDTO;
 import com.example.demo.dto.extended.ExtendedQuestions;
 import com.example.demo.filter.TopicsFilter;
+import com.example.demo.mapstruct.ReactionsMapper;
 import com.example.demo.mapstruct.TopicsMapper;
 import com.example.demo.model.Questions;
 import com.example.demo.model.Topics;
@@ -20,7 +20,6 @@ import com.example.demo.service.TopicsService;
 import jakarta.validation.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 //todo @Slf4j для логгера вместо статик поля
 @Slf4j
@@ -37,10 +37,9 @@ import java.util.*;
 @RequiredArgsConstructor
 public class TopicsServiceImpl implements TopicsService {
     //todo !!!оставить только поля топиков, остальное убрать, конвертер замени на Mapper, используй mapstruct
-    @Autowired
     private final Validator validator;
     private final ReactionsRepository reactionsRepository;
-    private final ReactionsConverter reactionsConverter; // todo заменить на маппер
+    private final ReactionsMapper reactionsMapper;
     private final QuestionsRepository questionsRepository;
     private final TopicsRepository topicsRepository;
     private final GetCityWeather getCityWeather;
@@ -50,7 +49,7 @@ public class TopicsServiceImpl implements TopicsService {
     //todo Вынеси @Value в рекорд класс пропертей и сюда инжекти их
     @Value("${openfeign.api.key}")
     private String apiKey;
-
+    
     @Override
     public Page<TopicsDTO> findAll(TopicsFilter filter, Pageable pageable) {
         return topicsRepository.findAll(filter.specification(),pageable).map(topicsMapper::toTopicsDTO);
@@ -111,7 +110,7 @@ public class TopicsServiceImpl implements TopicsService {
                 List<ExtendedQuestions> extendedQuestionsList = new ArrayList<>();
                 List<ReactionsDTO> reactionsList;
                 for (Questions questions : questionsList) {
-                    reactionsList = reactionsConverter.convertToListDTO(reactionsRepository.findAllByQuestionsId(questions));
+                    reactionsList = (reactionsRepository.findAllByQuestionsId(questions).stream().map(reactionsMapper::toReactionsDTO).collect(Collectors.toList()));
                     extendedQuestionsList.add(new ExtendedQuestions(questions.getId(), questions.getQuestion(), questions.getAnswer(), questions.getIs_popular(), reactionsList));
                 }
                 extendedTopicsDTO = new ExtendedTopicsDTO(topics.getId(),topicsMapper.toTopicsDTO(topics), extendedQuestionsList);
@@ -127,13 +126,13 @@ public class TopicsServiceImpl implements TopicsService {
             List<WeatherCityDTO> weatherCityDTOList = getCityWeather.getGeoByCity(city, 1, apiKey);
             if (weatherCityDTOList != null && !weatherCityDTOList.isEmpty()) {
                 try {
-                    WeatherDTO weatherDTO = getWeather.getWeather(weatherCityDTOList.get(0).getLat(), weatherCityDTOList.get(0).getLon(), apiKey, "metric");
+                    WeatherDTO weatherDTO = getWeather.getWeather(weatherCityDTOList.get(0).lat(), weatherCityDTOList.get(0).lon(), apiKey, "metric");
                     if (weatherDTO != null) {
                         HashMap<String, Object> response = new HashMap<>();
-                        response.put("Weather", weatherDTO.getWeather()[0].getMain());
-                        response.put("Description", weatherDTO.getWeather()[0].getDescription());
-                        response.put("Temp", weatherDTO.getMain().getTemp());
-                        response.put("Pressure", weatherDTO.getMain().getPressure());
+                        response.put("Weather", weatherDTO.weather()[0].main());
+                        response.put("Description", weatherDTO.weather()[0].description());
+                        response.put("Temp", weatherDTO.main().temp());
+                        response.put("Pressure", weatherDTO.main().pressure());
                         return ResponseEntity.ok(response);
                     }
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Weather not found");

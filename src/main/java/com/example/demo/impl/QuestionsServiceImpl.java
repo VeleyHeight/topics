@@ -1,12 +1,12 @@
 package com.example.demo.impl;
 
-import com.example.demo.converter.ReactionsConverter;
 import com.example.demo.dto.ReactionsDTO;
 import com.example.demo.dto.extended.ExtendedQuestions;
 import com.example.demo.dto.extended.ExtendedTopicsDTO;
 import com.example.demo.dto.QuestionsDTO;
 import com.example.demo.filter.QuestionsFilter;
 import com.example.demo.mapstruct.QuestionsMapper;
+import com.example.demo.mapstruct.ReactionsMapper;
 import com.example.demo.mapstruct.TopicsMapper;
 import com.example.demo.model.Questions;
 import com.example.demo.model.Topics;
@@ -25,15 +25,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class QuestionsServiceImpl implements QuestionsService {
 
     private final QuestionsRepository questionsRepository;
+    private final ReactionsMapper reactionsMapper;
     private final TopicsRepository topicsRepository;
     private final ReactionsRepository reactionsRepository;
-    private final ReactionsConverter reactionsConverter;
     private final TopicsMapper topicsMapper;
     private final QuestionsMapper questionsMapper;
     private final Validator validator;
@@ -79,7 +80,7 @@ public class QuestionsServiceImpl implements QuestionsService {
         if (questionsRepository.existsById(id)) {
             questionsRepository.deleteById(id);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found with ID: " + id);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Questions not found with ID: " + id);
         }
     }
 
@@ -91,7 +92,7 @@ public class QuestionsServiceImpl implements QuestionsService {
         questionsList.add(questions);
         topics = topicsRepository.findAllByQuestions(questionsList);
         List<ExtendedQuestions> extendedQuestionsList = new ArrayList<>();
-        List<ReactionsDTO> reactionsList = reactionsConverter.convertToListDTO(reactionsRepository.findAllByQuestionsId(questions));
+        List<ReactionsDTO> reactionsList = reactionsRepository.findAllByQuestionsId(questions).stream().map(reactionsMapper::toReactionsDTO).collect(Collectors.toList());
         extendedQuestionsList.add(new ExtendedQuestions(questions.getId(), questions.getQuestion(), questions.getAnswer(), questions.getIs_popular(), reactionsList));
         ExtendedTopicsDTO extendedTopicsDTO = new ExtendedTopicsDTO(topics.getId(), topicsMapper.toTopicsDTO(topics), extendedQuestionsList);
         return extendedTopicsDTO;

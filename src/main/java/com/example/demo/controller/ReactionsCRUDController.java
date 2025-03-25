@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.ReactionsDTO;
+import com.example.demo.filter.ReactionsFilter;
 import com.example.demo.model.Questions;
 import com.example.demo.model.Reactions;
 import com.example.demo.model.Topics;
@@ -33,54 +34,22 @@ public class ReactionsCRUDController {
 
     @PostMapping
     public ResponseEntity<ReactionsDTO> createReactions(@Valid @RequestBody ReactionsDTO reactionsDTO) {
-        return ResponseEntity.ok(reactionsService.saveReactions(reactionsDTO));
+        return ResponseEntity.status(HttpStatus.CREATED).body(reactionsService.saveReactions(reactionsDTO));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateReactions(@PathVariable Integer id, @Valid @RequestBody ReactionsDTO reactionsDTO) {
-        if (reactionsService.findById(id) == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Reactions with this id is not exist");
-        }
-//        reactionsDTO.setId(id); todo нужна замена в dto
-        return ResponseEntity.ok(reactionsService.updateReactions(reactionsDTO));
+        return ResponseEntity.ok(reactionsService.updateReactions(id, reactionsDTO));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> patchReactions(@PathVariable Integer id, @RequestBody HashMap<String, String> body) {
-        if (reactionsService.findById(id) == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Reactions with this id is not exist");
-        }
-        if (!body.containsKey("user_id") && !body.containsKey("type") && !body.containsKey("questionsId")) {
-            return ResponseEntity.badRequest().body("Input is empty");
-        }
-        ReactionsDTO reactions;
-        try {
-            reactions = reactionsService.patchTopics(body, id);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(reactions);
-
+    public ResponseEntity<?> patchReactions(@PathVariable Integer id, @RequestBody ReactionsFilter filter) {
+        return ResponseEntity.status(HttpStatus.OK).body(reactionsService.patchTopics(filter, id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteReactions(@PathVariable Integer id) {
-        if (reactionsService.findById(id) == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Reactions with this id is not exist");
-        } else {
-            return ResponseEntity.ok(reactionsService.deleteReactions(id));
-        }
+    public void deleteReactions(@PathVariable Integer id) {
+        reactionsService.deleteReactions(id);
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return errors;
-    }
 }

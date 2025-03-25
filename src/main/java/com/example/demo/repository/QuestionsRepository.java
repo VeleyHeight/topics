@@ -12,8 +12,6 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-//todo Лишняя аннотация
-@Table(name = "questions")
 public interface QuestionsRepository extends JpaRepository<Questions, Integer>, JpaSpecificationExecutor<Questions> {
     List<Questions> findByTopicId(Topics topicId);
 }

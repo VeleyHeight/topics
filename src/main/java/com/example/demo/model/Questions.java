@@ -27,8 +27,9 @@ public class Questions {
     private String question;
     @Column(columnDefinition = "TEXT")
     private String answer;
-    @Column(name = "is_popular")
-    private Boolean is_popular;
+    @Column(name = "is_popular", nullable = false)
+    @Builder.Default
+    private Boolean is_popular = false;
     @Column(insertable = false, nullable = false, updatable = false)
     @CreationTimestamp
     private Timestamp created_at;

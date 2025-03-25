@@ -10,8 +10,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
 
-//todo необязательная аннотация
-@Table(name = "topics")
 public interface TopicsRepository extends JpaRepository<Topics, Integer>, JpaSpecificationExecutor<Topics> {
     Topics findAllByQuestions(List<Questions> questions);
 }

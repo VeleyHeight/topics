@@ -51,7 +51,7 @@ public record TopicsFilter(String title, String description, String parentId) {
         });
     }
 
-    private Specification<Topics> containingParentId() { //todo не доделана проверка на соответствие для спецификации (не протестирована)
+    private Specification<Topics> containingParentId() {
         return ((root, query, criteriaBuilder) -> {
             if (parentId == null) {
                 return null;
