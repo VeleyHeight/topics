@@ -2,6 +2,7 @@ package com.example.demo.impl;
 
 import com.example.demo.client.GetCityWeather;
 import com.example.demo.client.GetWeather;
+import com.example.demo.config.WeatherApiProperties;
 import com.example.demo.dto.ReactionsDTO;
 import com.example.demo.dto.TopicsDTO;
 import com.example.demo.dto.WeatherCityDTO;
@@ -31,7 +32,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-//todo @Slf4j для логгера вместо статик поля
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -45,10 +45,7 @@ public class TopicsServiceImpl implements TopicsService {
     private final GetCityWeather getCityWeather;
     private final GetWeather getWeather;
     private final TopicsMapper topicsMapper;
-
-    //todo Вынеси @Value в рекорд класс пропертей и сюда инжекти их
-    @Value("${openfeign.api.key}")
-    private String apiKey;
+    private final WeatherApiProperties weatherApiProperties;
     
     @Override
     public Page<TopicsDTO> findAll(TopicsFilter filter, Pageable pageable) {
@@ -123,10 +120,10 @@ public class TopicsServiceImpl implements TopicsService {
     @Override
     public ResponseEntity<?> getWeatherInCity(String city) {
         try {
-            List<WeatherCityDTO> weatherCityDTOList = getCityWeather.getGeoByCity(city, 1, apiKey);
+            List<WeatherCityDTO> weatherCityDTOList = getCityWeather.getGeoByCity(city, 1, weatherApiProperties.key());
             if (weatherCityDTOList != null && !weatherCityDTOList.isEmpty()) {
                 try {
-                    WeatherDTO weatherDTO = getWeather.getWeather(weatherCityDTOList.get(0).lat(), weatherCityDTOList.get(0).lon(), apiKey, "metric");
+                    WeatherDTO weatherDTO = getWeather.getWeather(weatherCityDTOList.get(0).lat(), weatherCityDTOList.get(0).lon(), weatherApiProperties.key(), weatherApiProperties.units());
                     if (weatherDTO != null) {
                         HashMap<String, Object> response = new HashMap<>();
                         response.put("Weather", weatherDTO.weather()[0].main());

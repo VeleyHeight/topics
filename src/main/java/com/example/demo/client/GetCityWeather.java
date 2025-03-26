@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(value = "cityGet", url = "http://api.openweathermap.org/geo/1.0/direct")
+@FeignClient(value = "cityGet", url = "${openfeign.api.geo-url}")
 public interface GetCityWeather {
     @GetMapping
     List<WeatherCityDTO> getGeoByCity(@RequestParam String q, @RequestParam(required = false) Integer limit, @RequestParam String appid);

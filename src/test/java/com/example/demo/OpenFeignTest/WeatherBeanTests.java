@@ -2,6 +2,7 @@ package com.example.demo.OpenFeignTest;
 
 import com.example.demo.client.GetCityWeather;
 import com.example.demo.client.GetWeather;
+import com.example.demo.config.WeatherApiProperties;
 import com.example.demo.controller.TopicsCRUDController;
 import com.example.demo.dto.WeatherCityDTO;
 import com.example.demo.dto.WeatherDTO;
@@ -39,8 +40,8 @@ class WeatherBeanTests {
     private TopicsService topicsService;
     @Autowired
     private MockMvc mockMvc;
-    @Value("${openfeign.api.key}")
-    private String apiKey;
+    @Autowired
+    private WeatherApiProperties weatherApiProperties;
 
     @Nested
     @DisplayName("Тестирование контроллера")
@@ -83,13 +84,13 @@ class WeatherBeanTests {
         @DisplayName("Получение погоды для существующего города")
         public void getWeatherAndGeo() {
             String city = "Ярославль";
-            List<WeatherCityDTO> weatherCityDTO = getCityWeather.getGeoByCity(city, 1, apiKey);
+            List<WeatherCityDTO> weatherCityDTO = getCityWeather.getGeoByCity(city, 1, weatherApiProperties.key());
             Assertions.assertNotNull(weatherCityDTO);
             Assertions.assertTrue(!weatherCityDTO.isEmpty());
             Assertions.assertNotNull(weatherCityDTO.get(0).lat());
             Assertions.assertNotNull(weatherCityDTO.get(0).lon());
             System.out.println(weatherCityDTO.get(0));
-            WeatherDTO weatherDTO = getWeather.getWeather(weatherCityDTO.get(0).lat(), weatherCityDTO.get(0).lon(), apiKey, "metric");
+            WeatherDTO weatherDTO = getWeather.getWeather(weatherCityDTO.get(0).lat(), weatherCityDTO.get(0).lon(), weatherApiProperties.key(), weatherApiProperties.units());
             Assertions.assertNotNull(weatherDTO);
             Assertions.assertNotNull(weatherDTO.main());
             Assertions.assertTrue(weatherDTO.weather().length > 0);
@@ -99,7 +100,7 @@ class WeatherBeanTests {
         @Test
         @DisplayName("Получение погоды по координатам")
         public void getWeather() {
-            WeatherDTO weatherDTO = getWeather.getWeather(55.7504461, 37.6174943, apiKey, "metric");
+            WeatherDTO weatherDTO = getWeather.getWeather(55.7504461, 37.6174943, weatherApiProperties.key(), weatherApiProperties.units());
             Assertions.assertNotNull(weatherDTO);
             System.out.println(weatherDTO);
         }
@@ -108,7 +109,7 @@ class WeatherBeanTests {
         @DisplayName("Получение координат по названию города")
         public void getCity() {
             String city = "Ярославль";
-            List<WeatherCityDTO> weatherCityDTO = getCityWeather.getGeoByCity(city, 1, apiKey);
+            List<WeatherCityDTO> weatherCityDTO = getCityWeather.getGeoByCity(city, 1, weatherApiProperties.key());
             Assertions.assertTrue(!weatherCityDTO.isEmpty());
             Assertions.assertNotNull(weatherCityDTO.get(0).lat());
             Assertions.assertNotNull(weatherCityDTO.get(0).lon());

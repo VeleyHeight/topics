@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(value = "getWeather", url = "https://api.openweathermap.org/data/2.5/weather")
+@FeignClient(value = "getWeather", url = "${openfeign.api.weather-url}")
 public interface GetWeather {
     @GetMapping
     WeatherDTO getWeather(@RequestParam Double lat, @RequestParam Double lon, @RequestParam String appid, @RequestParam String units);

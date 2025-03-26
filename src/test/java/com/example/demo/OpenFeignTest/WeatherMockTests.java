@@ -2,6 +2,7 @@ package com.example.demo.OpenFeignTest;
 
 import com.example.demo.client.GetCityWeather;
 import com.example.demo.client.GetWeather;
+import com.example.demo.config.WeatherApiProperties;
 import com.example.demo.controller.TopicsCRUDController;
 import com.example.demo.dto.WeatherCityDTO;
 import com.example.demo.dto.WeatherDTO;
@@ -48,8 +49,9 @@ class WeatherMockTests {
     String city;
     List<WeatherCityDTO> weatherCityDTO;
     WeatherDTO weatherDTO;
-    @Value("${openfeign.api.key}")
-    private String apiKey;
+    @Mock
+    WeatherApiProperties weatherApiProperties1;
+    WeatherApiProperties weatherApiProperties = new WeatherApiProperties("ff60c2193457fb3fc6b459ae519fb054", "http://api.openweathermap.org/geo/1.0/direct", "https://api.openweathermap.org/data/2.5/weather", "metric");
 
     @BeforeEach
     void setUp() {
@@ -115,14 +117,14 @@ class WeatherMockTests {
         @Test
         @DisplayName("Получение погоды для существующего города")
         public void getWeatherAndGeo() {
-            Mockito.when(getCityWeather.getGeoByCity(city, 1, apiKey)).thenReturn(weatherCityDTO);
-            Mockito.when(getWeather.getWeather(weatherCityDTO.get(0).lat(), weatherCityDTO.get(0).lon(), apiKey, "metric")).thenReturn(weatherDTO);
-            List<WeatherCityDTO> weatherCityDTOMock = getCityWeather.getGeoByCity(city, 1, apiKey);
+            Mockito.when(getCityWeather.getGeoByCity(city, 1, weatherApiProperties.key())).thenReturn(weatherCityDTO);
+            Mockito.when(getWeather.getWeather(weatherCityDTO.get(0).lat(), weatherCityDTO.get(0).lon(), weatherApiProperties.key(), weatherApiProperties.units())).thenReturn(weatherDTO);
+            List<WeatherCityDTO> weatherCityDTOMock = getCityWeather.getGeoByCity(city, 1, weatherApiProperties.key());
             Assertions.assertEquals(1, weatherCityDTOMock.size());
             Assertions.assertNotNull(weatherCityDTOMock.get(0).lat());
             Assertions.assertNotNull(weatherCityDTOMock.get(0).lon());
             System.out.println(weatherCityDTO.get(0));
-            WeatherDTO weatherDTOMock = getWeather.getWeather(weatherCityDTO.get(0).lat(), weatherCityDTO.get(0).lon(), apiKey, "metric");
+            WeatherDTO weatherDTOMock = getWeather.getWeather(weatherCityDTO.get(0).lat(), weatherCityDTO.get(0).lon(), weatherApiProperties.key(), weatherApiProperties.units());
             Assertions.assertNotNull(weatherDTOMock);
             Assertions.assertNotNull(weatherDTOMock.main());
             Assertions.assertTrue(weatherDTOMock.weather().length > 0);
@@ -132,8 +134,8 @@ class WeatherMockTests {
         @Test
         @DisplayName("Получение погоды по координатам")
         public void getWeather() {
-            Mockito.when(getWeather.getWeather(weatherCityDTO.get(0).lat(), weatherCityDTO.get(0).lon(), apiKey, "metric")).thenReturn(weatherDTO);
-            WeatherDTO weatherDTO = getWeather.getWeather(55.7504461, 37.6174943, apiKey, "metric");
+            Mockito.when(getWeather.getWeather(weatherCityDTO.get(0).lat(), weatherCityDTO.get(0).lon(), weatherApiProperties.key(), weatherApiProperties.units())).thenReturn(weatherDTO);
+            WeatherDTO weatherDTO = getWeather.getWeather(55.7504461, 37.6174943, weatherApiProperties.key(), weatherApiProperties.units());
             Assertions.assertNotNull(weatherDTO);
             Assertions.assertEquals(11.6, weatherDTO.main().temp());
             System.out.println(weatherDTO);
@@ -142,8 +144,8 @@ class WeatherMockTests {
         @Test
         @DisplayName("Получение координат по названию города")
         public void getCity() {
-            Mockito.when(getCityWeather.getGeoByCity(city, 1, apiKey)).thenReturn(weatherCityDTO);
-            List<WeatherCityDTO> weatherCityDTO = getCityWeather.getGeoByCity(city, 1, apiKey);
+            Mockito.when(getCityWeather.getGeoByCity(city, 1, weatherApiProperties.key())).thenReturn(weatherCityDTO);
+            List<WeatherCityDTO> weatherCityDTO = getCityWeather.getGeoByCity(city, 1, weatherApiProperties.key());
             Assertions.assertTrue(!weatherCityDTO.isEmpty());
             Assertions.assertNotNull(weatherCityDTO.get(0).lat());
             Assertions.assertNotNull(weatherCityDTO.get(0).lon());
@@ -157,10 +159,13 @@ class WeatherMockTests {
         @Test
         @DisplayName("Существующий город")
         public void serviceCorrect() {
-            Mockito.when(getCityWeather.getGeoByCity(city, 1, apiKey)).thenReturn(weatherCityDTO);
-            Mockito.when(getWeather.getWeather(weatherCityDTO.get(0).lat(), weatherCityDTO.get(0).lon(), apiKey, "metric")).thenReturn(weatherDTO);
+            Mockito.when(getCityWeather.getGeoByCity(city, 1, weatherApiProperties.key())).thenReturn(weatherCityDTO);
+            Mockito.when(getWeather.getWeather(weatherCityDTO.get(0).lat(), weatherCityDTO.get(0).lon(), weatherApiProperties.key(), weatherApiProperties.units())).thenReturn(weatherDTO);
+            Mockito.when(weatherApiProperties1.key()).thenReturn("ff60c2193457fb3fc6b459ae519fb054");
+            Mockito.when(weatherApiProperties1.units()).thenReturn("metric");
             ResponseEntity<?> response = topicsService.getWeatherInCity(city);
             Assertions.assertNotNull(response);
+            System.out.println(response.getStatusCode());
             Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
             System.out.println(topicsService.getWeatherInCity(city));
         }
@@ -169,9 +174,11 @@ class WeatherMockTests {
         @DisplayName("Не существующий город")
         public void serviceIncorrect() {
             city = "Неизвестный";
-            Mockito.when(getCityWeather.getGeoByCity(city, 1, apiKey)).thenReturn(new ArrayList<>());
+            Mockito.when(weatherApiProperties1.key()).thenReturn("ff60c2193457fb3fc6b459ae519fb054");
+            Mockito.when(getCityWeather.getGeoByCity(city, 1, weatherApiProperties.key())).thenReturn(new ArrayList<>());
             ResponseEntity<?> response = topicsService.getWeatherInCity(city);
             Assertions.assertNotNull(response);
+            System.out.println(response.getStatusCode());
             Assertions.assertTrue(response.getStatusCode().is4xxClientError());
             System.out.println(topicsService.getWeatherInCity(city));
         }

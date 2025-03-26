@@ -40,7 +40,7 @@ public class TopicsCRUDController {
     private final TopicsService topicsService;
 
     @GetMapping("/weather")
-    public ResponseEntity<?> getWeatherInCity(@Valid @RequestParam @NotBlank @NotNull String city) {
+    public ResponseEntity<?> getWeatherInCity(@Valid @RequestParam @NotBlank String city) {
         return topicsService.getWeatherInCity(city);
     }
 
