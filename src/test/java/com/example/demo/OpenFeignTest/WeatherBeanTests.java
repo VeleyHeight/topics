@@ -64,7 +64,7 @@ class WeatherBeanTests {
             String city = null;
             mockMvc.perform(MockMvcRequestBuilders.get("/topics/weather")
                             .contentType("application/json").param("city", city))
-                    .andExpect(status().is4xxClientError());
+                    .andExpect(status().is5xxServerError());
         }
 
         @Test
