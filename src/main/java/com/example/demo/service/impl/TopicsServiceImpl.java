@@ -1,4 +1,4 @@
-package com.example.demo.impl;
+package com.example.demo.service.impl;
 
 import com.example.demo.client.GetCityWeather;
 import com.example.demo.client.GetWeather;

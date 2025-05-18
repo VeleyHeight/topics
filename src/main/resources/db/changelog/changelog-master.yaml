@@ -5,3 +5,11 @@ databaseChangeLog:
       file: db/changelog/changeset/002_create_questions_table.sql
   - include:
       file: db/changelog/changeset/003_create_reactions_table.sql
+  - include:
+      file: db/changelog/changeset/007_create_users_table.sql
+  - include:
+      file: db/changelog/changeset/008_insert_users_table.sql
+  - include:
+      file: db/changelog/changeset/009_add_created_at_to_users.sql
+  - include:
+      file: db/changelog/changeset/010_update_existing_users_created_at.sql

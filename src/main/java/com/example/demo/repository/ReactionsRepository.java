@@ -9,8 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-//Лишняя аннотация
-@Table(name = "reactions")
 public interface ReactionsRepository extends JpaRepository<Reactions, Integer> {
     List<Reactions> findAllByQuestionsId(Questions questions);
 }

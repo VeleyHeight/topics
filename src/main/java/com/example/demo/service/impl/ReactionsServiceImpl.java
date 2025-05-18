@@ -1,4 +1,4 @@
-package com.example.demo.impl;
+package com.example.demo.service.impl;
 
 import com.example.demo.dto.ReactionsDTO;
 import com.example.demo.filter.ReactionsFilter;
