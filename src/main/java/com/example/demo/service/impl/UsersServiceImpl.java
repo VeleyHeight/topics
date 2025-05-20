@@ -80,4 +80,9 @@ public class UsersServiceImpl implements UsersService, UserDetailsService {
         }
         return usersMapper.toDTO(users);
     }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        return usersRepository.existsByUsername(username);
+    }
 }

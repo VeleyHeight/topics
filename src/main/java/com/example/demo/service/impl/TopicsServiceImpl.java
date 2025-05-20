@@ -2,7 +2,7 @@ package com.example.demo.service.impl;
 
 import com.example.demo.client.GetCityWeather;
 import com.example.demo.client.GetWeather;
-import com.example.demo.config.WeatherApiProperties;
+import com.example.demo.config.properties.WeatherApiProperties;
 import com.example.demo.dto.ReactionsDTO;
 import com.example.demo.dto.TopicsDTO;
 import com.example.demo.dto.WeatherCityDTO;
@@ -21,7 +21,6 @@ import com.example.demo.service.TopicsService;
 import jakarta.validation.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;

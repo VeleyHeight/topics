@@ -1,7 +1,6 @@
-package com.example.demo.config;
+package com.example.demo.config.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 @ConfigurationProperties(prefix = "openfeign.api")
 public record WeatherApiProperties(

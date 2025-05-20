@@ -15,4 +15,6 @@ public interface UsersService {
     void delete(Integer id);
 
     UsersDTOResponse findById(Integer id);
+
+    boolean existsByUsername(String username);
 }

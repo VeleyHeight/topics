@@ -2,21 +2,17 @@ package com.example.demo.OpenFeignTest;
 
 import com.example.demo.client.GetCityWeather;
 import com.example.demo.client.GetWeather;
-import com.example.demo.config.WeatherApiProperties;
-import com.example.demo.controller.TopicsCRUDController;
+import com.example.demo.config.properties.WeatherApiProperties;
 import com.example.demo.dto.WeatherCityDTO;
 import com.example.demo.dto.WeatherDTO;
 import com.example.demo.service.TopicsService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -24,7 +20,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.HashMap;
 import java.util.List;
 
 @ActiveProfiles("test")

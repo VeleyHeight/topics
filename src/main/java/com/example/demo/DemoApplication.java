@@ -18,8 +18,9 @@ public class DemoApplication {
 //		System.out.println(passwordEncoder.encode("Admin"));
 //		System.out.println(passwordEncoder.encode("UserAndAdmin"));
 		SpringApplication.run(DemoApplication.class, args);
-		System.out.println();
 	}
 	@Bean
-	public BCryptPasswordEncoder passwordEncoder() {return new BCryptPasswordEncoder();}
+	public BCryptPasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 }

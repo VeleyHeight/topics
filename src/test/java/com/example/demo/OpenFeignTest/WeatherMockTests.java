@@ -2,7 +2,7 @@ package com.example.demo.OpenFeignTest;
 
 import com.example.demo.client.GetCityWeather;
 import com.example.demo.client.GetWeather;
-import com.example.demo.config.WeatherApiProperties;
+import com.example.demo.config.properties.WeatherApiProperties;
 import com.example.demo.controller.TopicsCRUDController;
 import com.example.demo.dto.WeatherCityDTO;
 import com.example.demo.dto.WeatherDTO;
