@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -26,20 +27,23 @@ import java.util.Collections;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UsersServiceImpl implements UsersService, UserDetailsService {
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return usersRepository.findByUsername(username).map(users -> {
-            log.info("User roles for {}: {}", username, users.getRoles());
-            return new User(users.getUsername(),
-                    users.getPassword(), Collections.singleton(users.getRoles()));
-        }).orElseThrow(
-                () -> new UsernameNotFoundException("Failed to find user with username: " + username));
-    }
+public class UsersServiceImpl implements UsersService
+//        , UserDetailsService
+{
 
     private final UsersRepository usersRepository;
     private final UsersMapper usersMapper;
     private final PasswordEncoder passwordEncoder;
+
+//    @Override
+//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+//        return usersRepository.findByUsername(username).map(users -> {
+//            log.info("User roles for {}: {}", username, users.getRoles());
+//            return new User(users.getUsername(),
+//                    users.getPassword(), Collections.singleton(users.getRoles()));
+//        }).orElseThrow(
+//                () -> new UsernameNotFoundException("Failed to find user with username: " + username));
+//    }
 
     @Override
     @Transactional(readOnly = true)
@@ -51,6 +55,9 @@ public class UsersServiceImpl implements UsersService, UserDetailsService {
     @Transactional
     public UsersDTOResponse save(UsersDTORequest users) {
         log.info("Saving users: {}", users);
+        if (usersRepository.existsByUsername(users.username())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
+        }
         var usersSave = usersMapper.toUsers(users);
         usersSave.setPassword(passwordEncoder.encode(usersSave.getPassword()));
         var savedUser = usersRepository.save(usersSave);
