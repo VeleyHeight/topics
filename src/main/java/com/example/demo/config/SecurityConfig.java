@@ -30,13 +30,19 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues()))
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.addAllowedOrigin("*");
+                    config.addAllowedMethod("*");
+                    config.addAllowedHeader("*");
+                    return config;
+                }))
 //                .sessionManagement(managementConfigurer -> managementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorization ->
                         authorization
                                 .requestMatchers("/questions/**").hasAnyAuthority("USER", "ADMIN")
                                 .requestMatchers("/reactions/**").hasAuthority("ADMIN")
-                                .requestMatchers("/topics/**").permitAll()
+                                .requestMatchers("/topics/**").authenticated()
 //                                .requestMatchers(HttpMethod.GET, "/**").authenticated()
 //                                .requestMatchers("/user/**").hasAuthority(name+(ADMIN.getAuthority()).toLowerCase())
 //                                .requestMatchers("/topics/**").hasAuthority(ADMIN.getAuthority())

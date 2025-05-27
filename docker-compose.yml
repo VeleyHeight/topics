@@ -1,3 +1,107 @@
+#volumes:
+#  pg_topics:
+#  prometheus_data:
+#
+#services:
+#  topics_db:
+#    image: postgres
+#    container_name: topics_db
+#    restart: unless-stopped
+#    environment:
+#      - POSTGRES_USER=postgres
+#      - POSTGRES_PASSWORD=1234
+#      - POSTGRES_DB=topics
+#    volumes:
+#      - pg_topics:/var/lib/postgresql/data
+#    ports:
+#      - "5432:5432"
+##    healthcheck:
+##      test: ["CMD-SHELL", "pg_isready -U postgres"]
+##      interval: 1s
+##      timeout: 5s
+##      retries: 10
+#    networks:
+#      - keycloak_net
+#  prometheus:
+#    image: prom/prometheus
+#    container_name: prometheus
+#    restart: unless-stopped
+#    volumes:
+#      - prometheus_data:/prometheus
+#      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+#    ports:
+#      - "9090:9090"
+#    networks:
+#      - keycloak_net
+#  app:
+#    restart: unless-stopped
+#    build: .
+#    ports:
+#      - "8090:8090"
+#    depends_on:
+#      - topics_db
+#      - keycloak
+##      topics_db:
+##        condition: service_healthy
+##      keycloak:
+##        condition: service_healthy
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://topics_db:5432/topics
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: 1234
+#      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/topics
+##      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://localhost:8080/realms/topics
+##      - SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_REDIRECT_URI=http://app:8090/login/oauth2/code/keycloak
+#    networks:
+#      - keycloak_net
+#  keycloak:
+#    image: quay.io/keycloak/keycloak
+#    container_name: keycloak
+#    command: start-dev
+#    environment:
+#      KC_DB: postgres
+#      KC_DB_URL_HOST: topics_db
+#      KC_DB_URL_DATABASE: topics
+#      KC_DB_USERNAME: postgres
+#      KC_DB_PASSWORD: 1234
+#      KC_HOSTNAME: keycloak
+#      KEYCLOAK_ADMIN: admin
+#      KEYCLOAK_ADMIN_PASSWORD: admin
+##      KEYCLOAK_ADMIN: admin
+##      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+##      KC_HTTP_PORT: 8080
+##      KC_HOSTNAME: keycloak
+##      KC_HOSTNAME_URL: http://localhost:8080
+##      KC_HOSTNAME_ADMIN_URL: http://localhost:8080
+##      KC_HOSTNAME_STRICT_BACKCHANNEL: true
+##      KC_HTTP_RELATIVE_PATH: /
+##      KC_HTTP_ENABLED: true
+##      KC_HEALTH_ENABLED: true
+##      KC_METRICS_ENABLED: true
+##      KC_DB: postgres
+##      KC_DB_URL: jdbc:postgresql://topics_db:5432/topics
+##      KC_DB_USERNAME: postgres
+##      KC_DB_PASSWORD: 1234
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - topics_db
+##      topics_db:
+##        condition: service_healthy
+##    healthcheck:
+##      test:
+##        [
+##          "CMD-SHELL",
+##          'exec 3<>/dev/tcp/localhost/8080; echo -e "GET /health/ready HTTP/1.1\nhost: localhost:8080\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
+##        ]
+##      start_period: 30s
+##      interval: 10s
+##      retries: 5
+##      timeout: 10s
+#    networks:
+#      - keycloak_net
+#networks:
+#  keycloak_net:
 volumes:
   pg_topics:
   prometheus_data:
@@ -17,11 +121,12 @@ services:
       - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 1s
+      interval: 5s
       timeout: 5s
       retries: 10
     networks:
       - keycloak_net
+
   prometheus:
     image: prom/prometheus
     container_name: prometheus
@@ -33,9 +138,11 @@ services:
       - "9090:9090"
     networks:
       - keycloak_net
+
   app:
     restart: unless-stopped
     build: .
+    container_name: app
     ports:
       - "8090:8090"
     depends_on:
@@ -47,55 +154,45 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://topics_db:5432/topics
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 1234
+      # Используем внутреннее имя сервиса Keycloak
+#      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/topics
+#      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/topics/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_ID: topicsapp
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET: jhoG8PVOiD8K0xbVPJuV9jT3B3O2Z0hX
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/topics
-#      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://localhost:8080/realms/topics
-#      - SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_REDIRECT_URI=http://app:8090/login/oauth2/code/keycloak
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/topics
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/topics/protocol/openid-connect/certs
     networks:
       - keycloak_net
+
   keycloak:
     image: quay.io/keycloak/keycloak
     container_name: keycloak
     command: start-dev
     environment:
       KC_DB: postgres
-      KC_DB_URL_HOST: topics_db
-      KC_DB_URL_DATABASE: topics
+      KC_DB_URL: jdbc:postgresql://topics_db:5432/topics
       KC_DB_USERNAME: postgres
       KC_DB_PASSWORD: 1234
-      KC_HOSTNAME: localhost
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-#      KEYCLOAK_ADMIN: admin
-#      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-#      KC_HTTP_PORT: 8080
-#      KC_HOSTNAME: keycloak
-#      KC_HOSTNAME_URL: http://localhost:8080
-#      KC_HOSTNAME_ADMIN_URL: http://localhost:8080
-#      KC_HOSTNAME_STRICT_BACKCHANNEL: true
-#      KC_HTTP_RELATIVE_PATH: /
-#      KC_HTTP_ENABLED: true
-#      KC_HEALTH_ENABLED: true
-#      KC_METRICS_ENABLED: true
-#      KC_DB: postgres
-#      KC_DB_URL: jdbc:postgresql://topics_db:5432/topics
-#      KC_DB_USERNAME: postgres
-#      KC_DB_PASSWORD: 1234
-    ports:
-      - "8080:8080"
+      # Настройки для корректной работы внутри и снаружи Docker
+      KC_HOSTNAME: localhost
+      KC_HTTP_PORT: 8080
+#      KC_PROXY: edge
     depends_on:
       topics_db:
         condition: service_healthy
     healthcheck:
       test:
         [
-          "CMD-SHELL",
-          'exec 3<>/dev/tcp/localhost/8080; echo -e "GET /health/ready HTTP/1.1\nhost: localhost:8080\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
+        "CMD-SHELL",
+        'exec 3<>/dev/tcp/localhost/8080; echo -e "GET /health/ready HTTP/1.1\nhost: localhost:8080\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
         ]
-      start_period: 30s
-      interval: 10s
-      retries: 5
-      timeout: 10s
+    ports:
+      - "8080:8080"
     networks:
       - keycloak_net
+
 networks:
   keycloak_net:

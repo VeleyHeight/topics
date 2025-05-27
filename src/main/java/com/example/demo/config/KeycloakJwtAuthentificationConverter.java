@@ -17,13 +17,13 @@ import java.util.stream.Collectors;
 public class KeycloakJwtAuthentificationConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
     @Override
     public Collection<GrantedAuthority> convert(Jwt source) {
-        log.info(source.toString());
-        List<String> roles = source.getClaimAsStringList("roles");
-        log.info("Количество ролей: "+ roles.size());
+        log.warn(source.toString());
+        List<String> roles = source.getClaim("roles");
+        log.warn("Количество ролей: "+ roles.size());
         if(roles == null){
             return Collections.emptyList();
         }
-        log.info("Полученная роль: "+roles.get(0));
+        log.warn("Полученная роль: "+roles.get(0));
         return roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }
 }
