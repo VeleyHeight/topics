@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorization ->
                         authorization
                                 .requestMatchers("/questions/**").hasAnyAuthority("USER", "ADMIN")
+                                .requestMatchers("/questions/**").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers("/reactions/**").hasAuthority("ADMIN")
                                 .requestMatchers("/topics/**").authenticated()
 //                                .requestMatchers(HttpMethod.GET, "/**").authenticated()

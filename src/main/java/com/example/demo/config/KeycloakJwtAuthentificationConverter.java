@@ -12,18 +12,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
+
 @RequiredArgsConstructor
 public class KeycloakJwtAuthentificationConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
     @Override
     public Collection<GrantedAuthority> convert(Jwt source) {
-        log.warn(source.toString());
         List<String> roles = source.getClaim("roles");
-        log.warn("Количество ролей: "+ roles.size());
         if(roles == null){
             return Collections.emptyList();
         }
-        log.warn("Полученная роль: "+roles.get(0));
         return roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }
 }
