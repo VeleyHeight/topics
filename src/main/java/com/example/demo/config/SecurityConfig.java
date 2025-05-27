@@ -37,18 +37,14 @@ public class SecurityConfig {
                     config.addAllowedHeader("*");
                     return config;
                 }))
-//                .sessionManagement(managementConfigurer -> managementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(managementConfigurer -> managementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorization ->
                         authorization
-                                .requestMatchers("/questions/**").hasAnyAuthority("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/**").permitAll()
+//                                .requestMatchers("/user/**").hasAuthority("ADMIN")
+                                .requestMatchers("/topics/**").hasAuthority("ADMIN")
+                                .requestMatchers("/questions/**").hasAuthority("ADMIN")
                                 .requestMatchers("/reactions/**").hasAuthority("ADMIN")
-                                .requestMatchers("/topics/**").authenticated()
-//                                .requestMatchers(HttpMethod.GET, "/**").authenticated()
-//                                .requestMatchers("/user/**").hasAuthority(name+(ADMIN.getAuthority()).toLowerCase())
-//                                .requestMatchers("/topics/**").hasAuthority(ADMIN.getAuthority())
-//                                .requestMatchers("/questions/**").hasAuthority(ADMIN.getAuthority())
-//                                .requestMatchers("/reactions/**").hasAuthority(ADMIN.getAuthority())
-//                                .requestMatchers("/topics").fullyAuthenticated()
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwt -> jwt.jwtAuthenticationConverter(converter())))
 //                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
