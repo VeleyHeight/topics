@@ -1,6 +1,7 @@
 volumes:
   pg_topics:
   prometheus_data:
+  pg_keycloak:
 
 services:
   topics_db:
@@ -44,8 +45,8 @@ services:
     depends_on:
       topics_db:
         condition: service_healthy
-#      keycloak:
-#        condition: service_healthy
+      keycloak:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://topics_db:5432/topics
       SPRING_DATASOURCE_USERNAME: postgres
@@ -62,30 +63,50 @@ services:
     networks:
       - keycloak_net
 
-  keycloak:
-    image: quay.io/keycloak/keycloak
-    container_name: keycloak
-    command: start-dev
+  keycloak_db:
+    image: postgres
+    container_name: keycloak_db
+    restart: unless-stopped
     environment:
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://topics_db:5432/topics
-      KC_DB_USERNAME: postgres
-      KC_DB_PASSWORD: 1234
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_HOSTNAME: localhost
-      KC_HTTP_PORT: 8080
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=keycloak
+    volumes:
+      - pg_keycloak:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - keycloak_net
+
+  keycloak:
+    image: my-keycloak:latest
+    container_name: keycloak
+    environment:
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://keycloak_db:5432/keycloak
+      - KC_DB_USERNAME=postgres
+      - KC_DB_PASSWORD=1234
+      - KC_HOSTNAME=localhost
+      - KC_HTTP_PORT=8080
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+      - KC_HTTP_ENABLED=true
+      - KC_HTTP_PORT=8080
     depends_on:
-      topics_db:
+#      app:
+#        condition: service_healthy
+      keycloak_db:
         condition: service_healthy
-      app:
-        condition: service_healthy
-#    healthcheck:
-#      test:
-#        [
-#        "CMD-SHELL",
-#        'exec 3<>/dev/tcp/localhost/8080; echo -e "GET /health/ready HTTP/1.1\nhost: localhost:8080\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
-#        ]
+    healthcheck:
+      test: [ "CMD-SHELL", "timeout 10 bash -c '</dev/tcp/localhost/8080' || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     ports:
       - "8080:8080"
     networks:
