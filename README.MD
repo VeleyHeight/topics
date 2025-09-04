@@ -1,154 +1,216 @@
-# Spring Boot CRUD API
-
+# Topics Application
 ## Описание
-
-Это Spring Boot приложение реализует RESTful CRUD API для управления сущностями: `Topics`, `Reactions` и `Questions`. Приложение также интегрируется с внешним API для получения погоды по названию города.
+Topics Application — это Spring Boot приложение для управления темами, вопросами и реакциями пользователей. Приложение интегрировано с Keycloak для аутентификации и авторизации, а также использует внешний API для получения данных о погоде.
 
 ## Технологии
+* Java 17
 
-*   **Язык программирования:** Java 17
-*   **Фреймворк:** Spring Boot (3.x)
-*   **Управление зависимостями:** Maven
-*   **Ускорение разработки:** Lombok
-*   **Веб-разработка:** Spring Web
-*   **Работа с данными:** Spring Data JPA
-*   **Миграции базы данных:** Liquibase
-*   **Драйвер базы данных:** PostgreSQL
-*   **Валидация данных:** Validation API (jakarta.validation)
-*   **Мониторинг и управление:** Spring Boot Actuator
-*   **Метрики:** Prometheus
-*   **Интеграционное тестирование:** Testcontainers, JUnit 5
-*   **HTTP клиент:** OpenFeign
+* Spring Boot 3
 
-## Предварительные требования
+* Spring Security с Keycloak
 
-Убедитесь, что на вашем компьютере установлены следующие программы:
+* Spring Data JPA
 
-*   Java 17
-*   Maven
-*   Docker (для запуска через Docker Compose)
+* PostgreSQL
 
-## Сборка проекта
+* MapStruct
 
-Выполните следующую команду в корневой директории проекта:
+* OpenFeign
 
-```bash
-mvn clean install
-```
-Для сборки проекта с пропуском тестов используйте команду:
+* Docker & Docker Compose
 
-```bash
-mvn clean install -DskipTests
-```
-# Запуск приложения
-## Запуск через Spring Boot Run
-Вы можете запустить приложение непосредственно из вашей IDE или выполнив следующую команду в корневой директории проекта:
-```bash
-mvn spring-boot:run
-```
-## Запуск через Docker Compose
-1. Убедитесь, что Docker установлен на вашем компьютере.
-2. Соберите Docker Compose образы приложения:
-```
-docker compose build
-```
-3. Запустите приложение и PostgreSQL через Docker Compose:
-```
-docker-compose up -d
-```
-Убедитесь, что в вашем docker-compose.yml файле настроено подключение к базе данных PostgreSQL.
-# API Endpoints
-## Топики
-* **GET /topics/weather?city={city}**: Получение погоды в указанном городе (использует OpenFeign для вызова внешнего API).
-* **GET /topics**: Получение всех топиков с пагинацией и фильтрацией по названию.
-  * Параметры: page, size, title (необязательный).
-* **GET /topics/{id}**: Получение топика по ID.
-* **POST /topics**: Создание нового топика.
-* **PUT /topics/{id}**: Обновление существующего топика.
-* **PATCH /topics/{id}**: Частичное обновление существующего топика.
-* **DELETE /topics/{id}**: Удаление топика.
-* **GET /topics/extended/{id}**: Получение топика по ID с расширенной информацией.
-##  Questions
-*  **GET /questions**: Получение всех вопросов с пагинацией и фильтрацией по тексту вопроса.
-   * Параметры: ```page```, ```size```, ```questions``` (необязательный).
-*  **GET /questions/{id}**: Получение вопроса по ID.
-*  **POST /questions**: Создание нового вопроса.
-*  **PUT /questions/{id}**: Обновление существующего вопроса.
-*  **PATCH /questions/{id}**: Частичное обновление существующего вопроса.
-*  **DELETE /questions/{id}**: Удаление вопроса.
-*  **GET /questions/extended/{id}**: Получение вопроса по ID с расширенной информацией.
-##   Reactions
-*   **GET /reactions**: Получение всех реакций.
-*   **POST /reactions**: Создание новой реакции.
-*   **PUT /reactions/{id}**: Обновление существующей реакции.
-*   **PATCH /reactions/{id}**: Частичное обновление существующей реакции.
-*   **DELETE /reactions/{id}**: Удаление реакции.
-#    Тестирование
-Для запуска интеграционных тестов, использующих Testcontainers, выполните следующую команду:
-```
+* Prometheus (мониторинг)
+
+## Требования
+* Docker и Docker Compose
+
+* Maven 3.6+
+
+* Java 17
+
+## Установка и запуск
+Клонируйте репозиторий:
+
+~~~ bash
+git clone <repository-url>
+cd topics-app
+~~~
+Соберите приложение:
+
+~~~ bash
+mvn clean package
+~~~
+## Запустите приложения с помощью Docker Compose:
+
+~~~ bash
+docker-compose up --build
+~~~
+Приложение будет доступно по адресу: http://localhost:8090
+Keycloak будет доступен по адресу: http://localhost:8080
+Prometheus будет доступен по адресу: http://localhost:9090
+
+## Конфигурация
+### Базы данных
+Приложение использует две PostgreSQL базы данных:
+
+* topics_db для данных приложения
+
+* keycloak_db для данных Keycloak
+
+### Keycloak
+Настройки Keycloak находятся в файле topics-realm.json и автоматически импортируются при запуске.
+
+Данные для входа в админ-панель Keycloak:
+
+* URL: http://localhost:8080
+
+* Логин: admin
+
+* Пароль: admin
+
+### API погоды
+Приложение использует OpenWeatherMap API для получения данных о погоде. Настройки API находятся в файле application.properties.
+
+## API Endpoints
+### Топики
+* GET /topics - получить список топиков
+
+* GET /topics/{id} - получить топик по ID
+
+* POST /topics - создать новый топик
+
+* PUT /topics/{id} - обновить топик
+
+* DELETE /topics/{id} - удалить топик
+
+* GET /topics/weather?city={city} - получить погоду для указанного города
+
+### Вопросы
+* GET /questions - получить список вопросов
+
+* GET /questions/{id} - получить вопрос по ID
+
+* POST /questions - создать новый вопрос
+
+* PUT /questions/{id} - обновить вопрос
+
+* DELETE /questions/{id} - удалить вопрос
+
+### Реакции
+* GET /reactions - получить список реакций
+
+* POST /reactions - создать новую реакцию
+
+* PUT /reactions/{id} - обновить реакцию
+
+* DELETE /reactions/{id} - удалить реакцию
+
+### Пользователи
+* GET /user - получить список пользователей
+
+* GET /user/{id} - получить пользователя по ID
+
+* POST /user - создать нового пользователя
+
+* DELETE /user/{id} - удалить пользователя
+
+## Безопасность
+Приложение использует Keycloak для аутентификации и авторизации. Для доступа к защищенным endpoint'ам требуется действительный JWT токен от Keycloak.
+
+Роли пользователей:
+
+* USER - базовая роль пользователя
+
+* ADMIN - роль администратора с расширенными правами
+
+## Мониторинг
+Приложение настроено для работы с Prometheus. Метрики доступны по endpoint'у /actuator/prometheus.
+
+## Тестирование
+Приложение покрыто комплексными тестами, включающими:
+
+### Типы тестов
+* Unit тесты - тестирование мапперов (MapStruct)
+
+* Интеграционные тесты - тестирование репозиториев и сервисов с использованием Testcontainers
+
+* Mock тесты - тестирование контроллеров и сервисов с мокированием зависимостей
+
+* End-to-end тесты - тестирование API endpoints с TestRestTemplate
+
+Запуск тестов
+~~~ bash
+# Все тесты
 mvn test
-```
-Интеграционные тесты разворачивают контейнер PostgreSQL с использованием Testcontainers и проверяют взаимодействие с базой данных.
-# Миграции базы данных
-Для управления схемой базы данных используется Liquibase. Файлы миграций находятся в директории ```src/main/resources/db/changelog.``` Миграции применяются автоматически при запуске приложения.
-# Конфигурация
-Конфигурация приложения находится в файле ```src/main/resources/application.yml```. В текущей версии проекта разделение конфигурации на профили (например, application-local.yml) не реализовано.
-# Мониторинг
-Для мониторинга приложения используется Spring Boot Actuator. Доступ к эндпоинтам Actuator можно получить по адресу ```http://localhost:8080/actuator``` (порт может отличаться в зависимости от вашей конфигурации).
 
-Интеграция с Graphit в текущей версии проекта не реализована.
+# Только unit тесты
+mvn test -Dtest="*MapperTests"
 
-Для просмотра метрик Prometheus перейдите по адресу ```http://localhost:8080/actuator/prometheus```.
+# Только интеграционные тесты
+mvn test -Dtest="*RepositoryTests"
 
+# Только тесты контроллеров
+mvn test -Dtest="*ControllerTests"
+~~~
+### Тестовые конфигурации
+Тесты используют отдельный профиль test и Testcontainers для поднятия изолированной базы данных PostgreSQL. Конфигурация тестов находится в src/test/resources/application-test.properties.
 
-# Docker
-## Dockerfile
-В корне проекта находится Dockerfile, который используется для сборки Docker образа приложения.
+### Ключевые тестовые классы
+* TopicsMapperTests - тестирование маппинга между Topics и TopicsDTO
 
-## Docker Compose
-Файл docker-compose.yml в корне проекта используется для запуска приложения вместе с зависимостями (например, PostgreSQL и Prometheus). Пример docker-compose.yml:
-```
-volumes:
-  pg_topics:
-  prometheus_data:
+* WeatherBeanTests - интеграционные тесты для погодного API
 
-services:
-  topics_db:
-    image: postgres
-    container_name: topics_db
-    restart: always
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=1234
-      - POSTGRES_DB=topics
-    volumes:
-      - pg_topics:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus
-    restart: always
-    volumes:
-      - prometheus_data:/prometheus
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
-  app:
-    restart: always
-    build: .
-    ports:
-      - "8080:8080"
-    depends_on:
-      - topics_db
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://topics_db:5432/topics
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=1234
-```
-Замените ```your-app-name```, ```your_db_user```, ```your_db_password``` и ```your_db_name``` на соответствующие значения. Создайте файл ```prometheus.yml``` с базовой конфигурацией для сбора метрик.
-# Запуск приложения через Docker Compose
-1. Соберите Docker Compose образы (если еще не сделали): ```docker compose build```
-2. Запустите приложение через Docker Compose: ```docker compose up -d```
+* WeatherMockTests - mock тесты для погодного функционала
 
+* RepositoryTests - тестирование репозиториев с Testcontainers
 
+* DemoApplicationTests - комплексные e2e тесты API endpoints
+
+### Покрытие тестами
+Тесты покрывают:
+
+* Все слои приложения (контроллеры, сервисы, репозитории, мапперы)
+
+* Валидацию данных
+
+* Обработку ошибок
+
+* Интеграцию с внешними API
+
+* Безопасность и авторизацию
+
+* Работу с базой данных
+
+Структура проекта
+~~~ text
+src/
+├── main/
+│   ├── java/com/example/demo/
+│   │   ├── client/          # Feign клиенты для внешних API
+│   │   ├── config/          # Конфигурационные классы
+│   │   ├── controller/      # REST контроллеры
+│   │   ├── dto/            # Data Transfer Objects
+│   │   ├── filter/         # Фильтры для поиска
+│   │   ├── mapstruct/      # Мапперы для преобразования DTO<->Entity
+│   │   ├── model/          # JPA сущности
+│   │   ├── repository/     # JPA репозитории
+│   │   └── service/        # Сервисный слой
+│   └── resources/
+│       └── application.properties
+Dockerfile
+docker-compose.yml
+prometheus.yml
+~~~
+## Разработка
+### Для разработки и отладки:
+
+1. Запустите базы данных и Keycloak:
+
+~~~ bash
+docker-compose up topics_db keycloak_db keycloak
+~~~
+2. Запустите приложение локально:
+
+~~~ bash
+mvn spring-boot:run
+~~~
